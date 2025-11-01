@@ -310,11 +310,12 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .email-info-header {
-  padding: 1.5rem;
+  padding: 2rem 2rem 1.5rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid var(--border);
+  background: var(--bg-tertiary);
 }
 
 .email-details {
