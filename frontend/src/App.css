@@ -488,11 +488,12 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .message-content {
-  margin-top: 1rem;
-  padding: 1.5rem;
+  margin-top: 1.5rem;
+  padding: 2rem;
   background: var(--bg-primary);
-  border-radius: 8px;
+  border-radius: 12px;
   min-height: 300px;
+  border: 1px solid var(--border);
 }
 
 .html-content {
