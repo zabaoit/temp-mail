@@ -375,7 +375,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .message-card-content {
-  padding: 1.25rem !important;
+  padding: 1.5rem !important;
+  position: relative;
 }
 
 .message-header {
