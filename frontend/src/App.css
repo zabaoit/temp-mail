@@ -113,7 +113,9 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Sidebar */
 .sidebar {
-  width: 360px;
+  width: 420px;
+  min-width: 380px;
+  max-width: 480px;
   background: var(--bg-secondary);
   border-radius: 16px;
   border: 1px solid var(--border);
