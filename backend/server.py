@@ -80,7 +80,7 @@ async def get_available_domains():
 
 async def create_mailtm_account(address: str, password: str):
     """Create account on Mail.tm"""
-    async with httpx.AsyncClient(timeout=30.0) as http_client:
+    async with httpx.AsyncClient(timeout=10.0) as http_client:
         try:
             response = await http_client.post(
                 f"{MAILTM_BASE_URL}/accounts",
