@@ -19,7 +19,7 @@ def create_database():
     DB_PORT = int(os.environ.get('DB_PORT', '3306'))
     DB_USER = os.environ.get('DB_USER', 'root')
     DB_PASSWORD = os.environ.get('DB_PASSWORD', '')
-    DB_NAME = os.environ.get('DB_NAME', 'garena_creator_db')
+    DB_NAME = os.environ.get('DB_NAME', 'temp_mail')
     
     print(f"\n🔌 Đang kết nối đến MySQL tại {DB_HOST}:{DB_PORT}...")
     
