@@ -124,7 +124,7 @@ async def get_mailtm_messages(token: str):
 
 async def get_mailtm_message_detail(token: str, message_id: str):
     """Get message detail from Mail.tm"""
-    async with httpx.AsyncClient(timeout=30.0) as http_client:
+    async with httpx.AsyncClient(timeout=10.0) as http_client:
         try:
             response = await http_client.get(
                 f"{MAILTM_BASE_URL}/messages/{message_id}",
