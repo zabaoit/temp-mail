@@ -166,9 +166,8 @@ async def create_email(request: CreateEmailRequest, db: Session = Depends(get_db
         # Get authentication token
         token = await get_mailtm_token(address, password)
         
-        # Save to database
+        # Save to database (id will be auto-generated)
         email_doc = TempEmailModel(
-            id=str(uuid.uuid4()),
             address=address,
             password=password,
             token=token,
