@@ -198,16 +198,13 @@ async def get_emails(db: Session = Depends(get_db)):
     return emails
 
 @api_router.get("/emails/{email_id}")
-async def get_email(email_id: str):
+async def get_email(email_id: str, db: Session = Depends(get_db)):
     """Get email by ID"""
-    email = await db.temp_emails.find_one({"id": email_id}, {"_id": 0})
+    email = db.query(TempEmailModel).filter(TempEmailModel.id == email_id).first()
     if not email:
         raise HTTPException(status_code=404, detail="Email not found")
     
-    if isinstance(email['created_at'], str):
-        email['created_at'] = datetime.fromisoformat(email['created_at'])
-    
-    return email
+    return email.to_dict()
 
 @api_router.get("/emails/{email_id}/messages")
 async def get_email_messages(email_id: str):
