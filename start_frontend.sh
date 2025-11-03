@@ -32,9 +32,9 @@ fi
 
 echo ""
 echo "✅ Frontend sẵn sàng!"
-echo "🌐 Ứng dụng đang chạy tại: http://localhost:3000"
+echo "🌐 Ứng dụng đang chạy tại: http://localhost:7050"
 echo "================================="
 echo ""
 
-# Chạy frontend
-yarn start
+# Chạy frontend trên port 7050
+PORT=7050 yarn start
