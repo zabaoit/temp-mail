@@ -1,11 +1,12 @@
 from sqlalchemy import Column, String, Integer, DateTime, Text
 from database import Base
 from datetime import datetime, timezone
+import uuid
 
 class TempEmail(Base):
     __tablename__ = "temp_emails"
     
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     address = Column(String(255), unique=True, nullable=False, index=True)
     password = Column(String(255), nullable=False)
     token = Column(Text, nullable=False)
