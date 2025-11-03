@@ -35,7 +35,7 @@ MAILTM_BASE_URL = "https://api.mail.tm"
 class TempEmailSchema(BaseModel):
     model_config = ConfigDict(extra="ignore", from_attributes=True)
     
-    id: str
+    id: int
     address: str
     password: str
     token: str
