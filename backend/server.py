@@ -59,7 +59,7 @@ class CreateEmailRequest(BaseModel):
     username: Optional[str] = None
 
 class CreateEmailResponse(BaseModel):
-    id: int
+    id: str  # Changed from int to str for UUID
     address: str
     created_at: datetime
 
