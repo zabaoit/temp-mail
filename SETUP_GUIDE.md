@@ -199,7 +199,7 @@ EXIT;
 ```
 
 ### 3. Kiểm tra Frontend
-Mở trình duyệt: http://localhost:3000
+Mở trình duyệt: http://localhost:7050
 
 ---
 
