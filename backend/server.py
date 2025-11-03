@@ -223,13 +223,13 @@ async def get_email_messages(email_id: str, db: Session = Depends(get_db)):
     return {"messages": messages, "count": len(messages)}
 
 @api_router.get("/emails/{email_id}/messages/{message_id}")
-async def get_message_detail(email_id: str, message_id: str):
+async def get_message_detail(email_id: str, message_id: str, db: Session = Depends(get_db)):
     """Get message detail"""
-    email = await db.temp_emails.find_one({"id": email_id}, {"_id": 0})
+    email = db.query(TempEmailModel).filter(TempEmailModel.id == email_id).first()
     if not email:
         raise HTTPException(status_code=404, detail="Email not found")
     
-    message = await get_mailtm_message_detail(email["token"], message_id)
+    message = await get_mailtm_message_detail(email.token, message_id)
     if not message:
         raise HTTPException(status_code=404, detail="Message not found")
     
