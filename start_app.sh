@@ -48,7 +48,7 @@ echo ""
 # Hỏi người dùng muốn chạy gì
 echo "Bạn muốn chạy:"
 echo "  1) Backend only (Port 8001)"
-echo "  2) Frontend only (Port 3000)"
+echo "  2) Frontend only (Port 7050)"
 echo "  3) Cả Backend và Frontend (Khuyến nghị)"
 echo "  4) Khởi tạo Database"
 echo ""
