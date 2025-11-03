@@ -159,8 +159,8 @@ cd /app/frontend
 # Cài đặt dependencies (lần đầu)
 yarn install
 
-# Chạy frontend
-yarn start
+# Chạy frontend trên port 7050
+PORT=7050 yarn start
 ```
 
 ---
