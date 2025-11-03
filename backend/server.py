@@ -236,18 +236,16 @@ async def get_message_detail(email_id: str, message_id: str, db: Session = Depen
     return message
 
 @api_router.post("/emails/{email_id}/refresh")
-async def refresh_messages(email_id: str):
+async def refresh_messages(email_id: str, db: Session = Depends(get_db)):
     """Refresh messages for an email"""
-    email = await db.temp_emails.find_one({"id": email_id}, {"_id": 0})
+    email = db.query(TempEmailModel).filter(TempEmailModel.id == email_id).first()
     if not email:
         raise HTTPException(status_code=404, detail="Email not found")
     
-    messages = await get_mailtm_messages(email["token"])
+    messages = await get_mailtm_messages(email.token)
     
-    await db.temp_emails.update_one(
-        {"id": email_id},
-        {"$set": {"message_count": len(messages)}}
-    )
+    email.message_count = len(messages)
+    db.commit()
     
     return {"messages": messages, "count": len(messages)}
 
