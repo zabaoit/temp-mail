@@ -169,7 +169,7 @@ yarn start
 
 Sau khi khởi động thành công:
 
-- **Frontend**: http://localhost:3000
+- **Frontend**: http://localhost:7050
 - **Backend API**: http://localhost:8001
 - **API Documentation**: http://localhost:8001/docs
 - **Alternative API Docs**: http://localhost:8001/redoc
