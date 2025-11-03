@@ -94,7 +94,7 @@ async def create_mailtm_account(address: str, password: str):
 
 async def get_mailtm_token(address: str, password: str):
     """Get authentication token from Mail.tm"""
-    async with httpx.AsyncClient(timeout=30.0) as http_client:
+    async with httpx.AsyncClient(timeout=10.0) as http_client:
         try:
             response = await http_client.post(
                 f"{MAILTM_BASE_URL}/token",
