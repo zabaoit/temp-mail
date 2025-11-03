@@ -65,7 +65,7 @@ class CreateEmailResponse(BaseModel):
 # Mail.tm Service Functions
 async def get_available_domains():
     """Get available domains from Mail.tm"""
-    async with httpx.AsyncClient(timeout=30.0) as http_client:
+    async with httpx.AsyncClient(timeout=10.0) as http_client:
         try:
             response = await http_client.get(f"{MAILTM_BASE_URL}/domains")
             response.raise_for_status()
