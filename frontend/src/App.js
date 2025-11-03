@@ -267,24 +267,6 @@ function App() {
         </header>
 
         {/* Main Content */}
-<<<<<<< HEAD
-        <div className="main-content">
-          {/* Sidebar - Email List */}
-          <aside className="sidebar">
-            <div className="sidebar-header">
-              <h2 className="sidebar-title">TempMail</h2>
-              <Button
-                onClick={createEmail}
-                disabled={loading}
-                size="sm"
-                className="create-email-btn"
-                data-testid="create-email-btn"
-              >
-                <Plus className="h-4 w-4 mr-1" />
-                Tạo mới
-              </Button>
-            </div>
-=======
         <main className="main-content-new">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="main-tabs">
             <TabsList className="tabs-list-new">
@@ -297,7 +279,6 @@ function App() {
                 Lịch sử ({historyEmails.length})
               </TabsTrigger>
             </TabsList>
->>>>>>> 6a60ca1a36d15926c993931128882a0a5b0b6a8c
 
             {/* Current Email Tab */}
             <TabsContent value="current" className="tab-content-new">
