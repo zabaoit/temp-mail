@@ -59,13 +59,16 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (selectedEmail && autoRefresh) {
+    if (selectedEmail?.id && autoRefresh) {
       const interval = setInterval(() => {
-        refreshMessages(selectedEmail.id, false);
+        // Double-check the ID is still valid before refreshing
+        if (selectedEmail?.id) {
+          refreshMessages(selectedEmail.id, false);
+        }
       }, 10000);
       return () => clearInterval(interval);
     }
-  }, [selectedEmail, autoRefresh]);
+  }, [selectedEmail?.id, autoRefresh]);
 
   const loadEmails = async () => {
     try {
