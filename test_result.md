@@ -195,6 +195,24 @@ frontend:
           - Cập nhật index.html với favicon links
           - Cập nhật title: "TempMail - Temporary Email Generator"
 
+  - task: "Sửa lỗi state management và auto-refresh"
+    implemented: true
+    working: true
+    file: "src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: |
+          ✅ Sửa lỗi frontend:
+          - Cải thiện auto-refresh useEffect với guard cho selectedEmail?.id
+          - Thêm validation trong refreshMessages() để ngăn gọi với ID rỗng
+          - Cải thiện loadEmails() để sync selectedEmail và tránh stale references
+          - Tự động clear selection khi email bị xóa (404 response)
+          - Fix memory leak và race condition issues
+
 infrastructure:
   - task: "Tạo startup scripts cho local development"
     implemented: true
