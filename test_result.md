@@ -212,7 +212,7 @@ infrastructure:
   - task: "Tạo documentation"
     implemented: true
     working: "NA"
-    file: "SETUP_GUIDE.md, README.md, HUONG_DAN_LOCAL.md"
+    file: "SETUP_GUIDE.md, README.md, HUONG_DAN_LOCAL.md, CHECKLIST.md, HUONG_DAN_PUSH_PULL.md"
     stuck_count: 0
     priority: "medium"
     needs_retesting: false
@@ -236,7 +236,7 @@ infrastructure:
              - API endpoints
              - Development workflow
           
-          3. HUONG_DAN_LOCAL.md (MỚI):
+          3. HUONG_DAN_LOCAL.md:
              - Hướng dẫn chi tiết bằng tiếng Việt
              - Yêu cầu hệ thống và cách cài đặt từng bước
              - 2 cách chạy: Script tự động và thủ công
@@ -244,6 +244,19 @@ infrastructure:
              - API endpoints documentation
              - Database schema
              - Development tips
+          
+          4. CHECKLIST.md (MỚI):
+             - Checklist tất cả files cần có
+             - Hướng dẫn kiểm tra từng file .env
+             - Troubleshooting cho từng loại lỗi
+             - Summary files bắt buộc
+          
+          5. HUONG_DAN_PUSH_PULL.md (MỚI):
+             - Hướng dẫn push code lên GitHub
+             - Hướng dẫn pull code về local
+             - Resolve merge conflicts
+             - Kiểm tra files sau khi pull
+             - Flow hoàn chỉnh từ dev → push → pull → run
 
 metadata:
   created_by: "main_agent"
