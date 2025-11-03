@@ -52,6 +52,7 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(true);
 
   useEffect(() => {
@@ -126,6 +127,7 @@ function App() {
       return;
     }
     
+    setRefreshing(true);
     try {
       const response = await axios.post(`${API}/emails/${emailId}/refresh`);
       setMessages(response.data.messages);
@@ -139,6 +141,11 @@ function App() {
         setSelectedEmail(null);
         setMessages([]);
       }
+      if (showToast) {
+        toast.error('Không thể làm mới tin nhắn');
+      }
+    } finally {
+      setRefreshing(false);
     }
   };
 
@@ -355,10 +362,11 @@ function App() {
                     variant="outline"
                     size="sm"
                     onClick={() => refreshMessages(selectedEmail.id)}
+                    disabled={refreshing}
                     data-testid="refresh-messages-btn"
                   >
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Làm mới
+                    <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                    {refreshing ? 'Đang tải...' : 'Làm mới'}
                   </Button>
                 </div>
 

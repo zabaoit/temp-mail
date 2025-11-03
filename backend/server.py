@@ -66,7 +66,7 @@ class CreateEmailResponse(BaseModel):
 # Mail.tm Service Functions
 async def get_available_domains():
     """Get available domains from Mail.tm"""
-    async with httpx.AsyncClient(timeout=30.0) as http_client:
+    async with httpx.AsyncClient(timeout=10.0) as http_client:
         try:
             response = await http_client.get(f"{MAILTM_BASE_URL}/domains")
             response.raise_for_status()
@@ -81,7 +81,7 @@ async def get_available_domains():
 
 async def create_mailtm_account(address: str, password: str):
     """Create account on Mail.tm"""
-    async with httpx.AsyncClient(timeout=30.0) as http_client:
+    async with httpx.AsyncClient(timeout=10.0) as http_client:
         try:
             response = await http_client.post(
                 f"{MAILTM_BASE_URL}/accounts",
@@ -95,7 +95,7 @@ async def create_mailtm_account(address: str, password: str):
 
 async def get_mailtm_token(address: str, password: str):
     """Get authentication token from Mail.tm"""
-    async with httpx.AsyncClient(timeout=30.0) as http_client:
+    async with httpx.AsyncClient(timeout=10.0) as http_client:
         try:
             response = await http_client.post(
                 f"{MAILTM_BASE_URL}/token",
@@ -109,7 +109,7 @@ async def get_mailtm_token(address: str, password: str):
 
 async def get_mailtm_messages(token: str):
     """Get messages from Mail.tm"""
-    async with httpx.AsyncClient(timeout=30.0) as http_client:
+    async with httpx.AsyncClient(timeout=10.0) as http_client:
         try:
             response = await http_client.get(
                 f"{MAILTM_BASE_URL}/messages",
@@ -124,7 +124,7 @@ async def get_mailtm_messages(token: str):
 
 async def get_mailtm_message_detail(token: str, message_id: str):
     """Get message detail from Mail.tm"""
-    async with httpx.AsyncClient(timeout=30.0) as http_client:
+    async with httpx.AsyncClient(timeout=10.0) as http_client:
         try:
             response = await http_client.get(
                 f"{MAILTM_BASE_URL}/messages/{message_id}",
