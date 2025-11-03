@@ -158,6 +158,27 @@ frontend:
           Đã cập nhật:
           - .env: REACT_APP_BACKEND_URL=http://localhost:8001
           - .env.local: PORT=7050 (theo yêu cầu user)
+  
+  - task: "Thêm favicon và logo icons"
+    implemented: true
+    working: "NA"
+    file: "public/index.html, public/favicon.ico, public/logo192.png, public/logo512.png, public/manifest.json"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: |
+          Đã tạo đầy đủ favicon và icons:
+          - favicon.ico: Multi-size (16x16, 32x32, 48x48, 64x64)
+          - logo192.png: Icon cho mobile/PWA (192x192)
+          - logo512.png: High-resolution icon (512x512)
+          - manifest.json: PWA configuration
+          - mail-icon.svg: Source SVG với theme màu tím gradient
+          - generate_icons.py: Script tự động tạo icons từ SVG
+          - Cập nhật index.html với favicon links
+          - Cập nhật title: "TempMail - Temporary Email Generator"
 
 infrastructure:
   - task: "Tạo startup scripts cho local development"
