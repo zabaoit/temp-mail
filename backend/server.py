@@ -249,7 +249,7 @@ async def refresh_messages(email_id: int, db: Session = Depends(get_db)):
     return {"messages": messages, "count": len(messages)}
 
 @api_router.delete("/emails/{email_id}")
-async def delete_email(email_id: str, db: Session = Depends(get_db)):
+async def delete_email(email_id: int, db: Session = Depends(get_db)):
     """Delete a temporary email"""
     email = db.query(TempEmailModel).filter(TempEmailModel.id == email_id).first()
     if not email:
