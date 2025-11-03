@@ -106,6 +106,12 @@ function App() {
   };
 
   const refreshMessages = async (emailId, showToast = true) => {
+    // Guard against undefined or empty email IDs
+    if (!emailId || emailId.trim() === '') {
+      console.warn('Attempted to refresh messages with invalid email ID:', emailId);
+      return;
+    }
+    
     try {
       const response = await axios.post(`${API}/emails/${emailId}/refresh`);
       setMessages(response.data.messages);
@@ -114,6 +120,11 @@ function App() {
       }
     } catch (error) {
       console.error('Error refreshing messages:', error);
+      // If email not found, clear the selection
+      if (error.response?.status === 404) {
+        setSelectedEmail(null);
+        setMessages([]);
+      }
     }
   };
 
