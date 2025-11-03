@@ -362,10 +362,11 @@ function App() {
                     variant="outline"
                     size="sm"
                     onClick={() => refreshMessages(selectedEmail.id)}
+                    disabled={refreshing}
                     data-testid="refresh-messages-btn"
                   >
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Làm mới
+                    <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                    {refreshing ? 'Đang tải...' : 'Làm mới'}
                   </Button>
                 </div>
 
