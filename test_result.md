@@ -194,6 +194,15 @@ frontend:
           - generate_icons.py: Script tự động tạo icons từ SVG
           - Cập nhật index.html với favicon links
           - Cập nhật title: "TempMail - Temporary Email Generator"
+      - working: "NA"
+        agent: "main"
+        comment: |
+          ✅ Đã thay đổi màu theme từ TÍM sang XANH LAM (Cyan/Teal):
+          - Cập nhật mail-icon.svg: gradient từ #4F46E5/#7C3AED → #0891b2/#06b6d4
+          - Tạo lại favicon.ico, logo192.png, logo512.png với màu xanh lam
+          - Cập nhật manifest.json: theme_color từ #4F46E5 → #0891b2
+          - Cập nhật index.html: meta theme-color từ #4F46E5 → #0891b2
+          - Giữ nguyên App.css (đã có màu xanh lam từ trước)
 
   - task: "Sửa lỗi state management và auto-refresh"
     implemented: true
