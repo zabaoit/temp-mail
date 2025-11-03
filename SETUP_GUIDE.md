@@ -232,13 +232,13 @@ mysql -u root -p -h localhost
 ```
 
 ### Lỗi: Port already in use
-**Nguyên nhân**: Cổng 8001 hoặc 3000 đã được sử dụng
+**Nguyên nhân**: Cổng 8001 hoặc 7050 đã được sử dụng
 
 **Giải pháp**:
 ```bash
 # Tìm process đang dùng port
 lsof -i :8001
-lsof -i :3000
+lsof -i :7050
 
 # Kill process
 kill -9 <PID>
