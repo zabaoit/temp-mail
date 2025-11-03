@@ -20,7 +20,7 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#4F46E5",
+  "theme_color": "#0891b2",
   "background_color": "#ffffff",
   "description": "Generate temporary email addresses instantly"
 }

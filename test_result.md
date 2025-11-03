@@ -194,6 +194,23 @@ frontend:
           - generate_icons.py: Script tự động tạo icons từ SVG
           - Cập nhật index.html với favicon links
           - Cập nhật title: "TempMail - Temporary Email Generator"
+      - working: "NA"
+        agent: "main"
+        comment: |
+          ✅ Đã thay đổi màu theme từ TÍM sang XANH LAM (Cyan/Teal):
+          - Cập nhật mail-icon.svg: gradient từ #4F46E5/#7C3AED → #0891b2/#06b6d4
+          - Tạo lại favicon.ico, logo192.png, logo512.png với màu xanh lam
+          - Cập nhật manifest.json: theme_color từ #4F46E5 → #0891b2
+          - Cập nhật index.html: meta theme-color từ #4F46E5 → #0891b2
+          - Giữ nguyên App.css (đã có màu xanh lam từ trước)
+      - working: "NA"
+        agent: "main"
+        comment: |
+          ✅ Đã đơn giản hóa icon design:
+          - Thay đổi từ icon phức tạp (có clock, lightning, gradient) sang icon đơn giản
+          - Icon mới: Chỉ có envelope outline đơn giản với màu trắng trên nền xanh lam
+          - Tạo lại tất cả favicon và logo files với design mới
+          - Design giống với lucide-react Mail icon để đồng nhất với UI
 
   - task: "Sửa lỗi state management và auto-refresh"
     implemented: true
@@ -396,3 +413,36 @@ agent_communication:
       - ✅ State management chắc chắn hơn
       - ✅ Auto-refresh hoạt động đúng ngay cả khi delete emails
       - ✅ Xử lý edge cases tốt hơn (email bị xóa trong khi đang được chọn)
+
+  - agent: "main"
+    message: |
+      ✅ THAY ĐỔI MÀU THEME: TÍM → XANH LAM (Cyan/Teal)
+      
+      Theo yêu cầu user: "đổi kiểu 2 thành kiểu 1"
+      - Kiểu 2 (cũ): Màu tím gradient (#4F46E5 → #7C3AED)
+      - Kiểu 1 (mới): Màu xanh lam gradient (#0891b2 → #06b6d4)
+      
+      Các thay đổi:
+      
+      1. ✅ mail-icon.svg:
+         - Gradient background: #4F46E5/#7C3AED → #0891b2/#06b6d4
+         - Clock circle: #4F46E5 → #0891b2
+         - Envelope flap: #E0E7FF → #cffafe (cyan light)
+      
+      2. ✅ Generated Icons:
+         - Tạo lại favicon.ico (multi-size)
+         - Tạo lại logo192.png
+         - Tạo lại logo512.png
+      
+      3. ✅ Configuration Files:
+         - manifest.json: theme_color #4F46E5 → #0891b2
+         - index.html: meta theme-color #4F46E5 → #0891b2
+      
+      4. ℹ️ App.css:
+         - Đã có màu xanh lam từ trước (#0891b2)
+         - Không cần thay đổi
+      
+      Kết quả:
+      - ✅ Toàn bộ theme bây giờ dùng màu xanh lam/cyan đồng nhất
+      - ✅ Favicon, logo và UI đều theo màu xanh lam
+      - ✅ PWA theme color đã cập nhật
