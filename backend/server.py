@@ -27,6 +27,14 @@ app = FastAPI()
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
+# Startup event to start background tasks
+@app.on_event("startup")
+async def startup_event():
+    """Start background tasks on application startup"""
+    from background_tasks import start_background_tasks
+    start_background_tasks()
+    logging.info("Application started with background tasks")
+
 # Mail.tm Configuration
 MAILTM_BASE_URL = "https://api.mail.tm"
 
