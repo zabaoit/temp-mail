@@ -184,13 +184,18 @@ async def create_email(request: CreateEmailRequest, db: Session = Depends(get_db
         # Get authentication token
         token = await get_mailtm_token(address, password)
         
+        # Calculate expiry time (10 minutes from now)
+        now = datetime.now(timezone.utc)
+        expires_at = now + timedelta(minutes=10)
+        
         # Save to database (id will be auto-generated)
         email_doc = TempEmailModel(
             address=address,
             password=password,
             token=token,
             account_id=account_data["id"],
-            created_at=datetime.now(timezone.utc),
+            created_at=now,
+            expires_at=expires_at,  # NEW
             message_count=0
         )
         
@@ -201,7 +206,8 @@ async def create_email(request: CreateEmailRequest, db: Session = Depends(get_db
         return CreateEmailResponse(
             id=email_doc.id,
             address=email_doc.address,
-            created_at=email_doc.created_at
+            created_at=email_doc.created_at,
+            expires_at=email_doc.expires_at  # NEW
         )
     except Exception as e:
         db.rollback()
