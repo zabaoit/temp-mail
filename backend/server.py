@@ -76,6 +76,11 @@ class CreateEmailResponse(BaseModel):
     id: str  # Changed from int to str for UUID
     address: str
     created_at: datetime
+    expires_at: datetime  # NEW
+
+
+class DeleteHistoryRequest(BaseModel):
+    ids: Optional[List[str]] = None  # If None, delete all
 
 # Mail.tm Service Functions
 async def get_available_domains():
