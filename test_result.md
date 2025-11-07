@@ -545,6 +545,97 @@ agent_communication:
     message: |
       ✅ THÊM LINK STYLING + TỐI ƯU HIỆU NĂNG
       
+
+
+  - agent: "main"
+    message: |
+      ✅ THÊM TÍNH NĂNG HẾT HẠN EMAIL TỰ ĐỘNG
+      
+      Yêu cầu từ user:
+      1. ✅ Khi hết 10 phút → chuyển email cũ vào lịch sử và tự động tạo email mới
+      2. ✅ Khi thêm thời gian → làm mới về 10 phút (không cộng dồn)
+      3. ✅ Lịch sử không giới hạn với tickbox để chọn xóa/xóa tất cả
+      
+      Backend Implementation:
+      
+      1. Database Models (MySQL & MongoDB):
+         ✅ TempEmail.expires_at: Thời điểm hết hạn
+         ✅ EmailHistory: Lưu email đã hết hạn (id, address, expired_at, token...)
+      
+      2. Background Tasks (chạy mỗi 30s):
+         ✅ Tự động tìm email hết hạn (expires_at <= now)
+         ✅ Chuyển vào EmailHistory collection/table
+         ✅ Xóa khỏi TempEmail
+         ✅ Auto-create email mới nếu không còn email active
+      
+      3. API Endpoints mới:
+         ✅ POST /api/emails/create: Thêm expires_at = created_at + 10 phút
+         ✅ POST /api/emails/{id}/extend-time: Reset expires_at = now + 10 phút
+         ✅ GET /api/emails/history/list: Lấy danh sách history (sort by expired_at desc)
+         ✅ GET /api/emails/history/{id}/messages: Xem messages từ history email
+         ✅ GET /api/emails/history/{id}/messages/{msg_id}: Chi tiết message
+         ✅ DELETE /api/emails/history/delete: Xóa history
+            - Body: { "ids": ["id1", "id2"] } → xóa các IDs cụ thể
+            - Body: { "ids": null } hoặc [] → xóa tất cả
+      
+      Frontend Implementation:
+      
+      1. Timer System:
+         ✅ Thay đổi từ local countdown → calculate từ expires_at
+         ✅ Update mỗi giây: timeLeft = Math.floor((expiresAt - now) / 1000)
+         ✅ Khi timeLeft = 0: Auto reload emails (backend đã tạo email mới)
+      
+      2. Extend Time Feature:
+         ✅ Nút "Làm mới 10 phút" (thay vì "Thêm 10 phút nữa")
+         ✅ Gọi API /extend-time → nhận expires_at mới
+         ✅ Update currentEmail.expires_at → timer tự động reset
+      
+      3. History Tab:
+         ✅ Load từ /api/emails/history/list
+         ✅ Mỗi item có checkbox (state: selectedHistoryIds)
+         ✅ Buttons:
+            - "Chọn tất cả" / "Bỏ chọn tất cả"
+            - "Xóa đã chọn (N)" - disabled khi chưa chọn
+            - "Xóa tất cả" - variant destructive màu đỏ
+         ✅ Click email → viewHistoryEmail() → xem messages
+         ✅ CSS: .history-card.selected với border accent color
+      
+      4. State Management:
+         ✅ selectedHistoryIds: Array of email IDs
+         ✅ toggleHistorySelection(): Toggle single item
+         ✅ toggleSelectAll(): Select/deselect all
+         ✅ deleteSelectedHistory(): DELETE với { ids: [...] }
+         ✅ deleteAllHistory(): DELETE với { ids: null }
+      
+      Dual Environment Support:
+      - Container (testing): MongoDB + motor driver
+      - Local (production): MySQL + SQLAlchemy + pymysql
+      
+      Files created/modified:
+      Backend:
+      - models.py: Thêm expires_at, EmailHistory (MySQL)
+      - models_mongodb.py: MongoDB versions (NEW)
+      - background_tasks.py: SQLAlchemy version (NEW)
+      - background_tasks_mongodb.py: MongoDB version (NEW)
+      - server.py: Updated với MongoDB & new endpoints
+      - requirements.txt: Thêm motor==3.3.2
+      
+      Frontend:
+      - src/App.js: Timer, extend-time, history UI logic
+      - src/App.css: History styles với checkbox & buttons
+      
+      Status: READY FOR TESTING
+      - Backend API đang chạy trên MongoDB
+      - Frontend đang chạy
+      - Background task đã start (check mỗi 30s)
+      
+      Cần test:
+      1. Tạo email → kiểm tra expires_at
+      2. Extend time → kiểm tra timer reset về 10 phút
+      3. Đợi hết hạn hoặc set expires_at ngắn → kiểm tra auto move to history
+      4. History: chọn, xóa đã chọn, xóa tất cả
+      5. Xem messages từ history email
+
       1. ✅ Styling cho links trong email:
          - Thêm màu xanh lam (#0891b2) và gạch dưới cho tất cả links
          - Hover effect với màu xanh nhạt hơn (#06b6d4)
