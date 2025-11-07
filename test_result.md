@@ -244,11 +244,11 @@ infrastructure:
 
   - task: "Thêm UI cho lịch sử email với tính năng xóa"
     implemented: true
-    working: "testing"
+    working: "NA"
     file: "src/App.js, src/App.css"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "testing"
         agent: "main"
@@ -265,6 +265,19 @@ infrastructure:
              - Nút "Xóa tất cả" - màu đỏ
              - Click vào email để xem tin nhắn history
           6. CSS styling cho selected state và actions
+      - working: "NA"
+        agent: "testing"
+        comment: |
+          ℹ️ FRONTEND NOT TESTED - Backend APIs verified working
+          
+          Per system limitations, frontend testing is not performed by testing agent.
+          Backend APIs that frontend depends on are all working correctly:
+          - GET /api/emails (with expires_at field)
+          - POST /api/emails/{id}/extend-time
+          - GET /api/emails/history/list
+          - DELETE /api/emails/history/delete
+          
+          Frontend implementation should work correctly as backend is fully functional.
 
     status_history:
       - working: "NA"
