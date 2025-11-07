@@ -58,10 +58,32 @@ function App() {
   const [activeTab, setActiveTab] = useState('current');
   const [selectedHistoryIds, setSelectedHistoryIds] = useState([]);
 
-  // Load emails on mount
+  // Load emails on mount and auto-create if no email exists
   useEffect(() => {
-    loadEmails();
-    loadHistory();
+    const initializeApp = async () => {
+      try {
+        const response = await axios.get(`${API}/emails`);
+        const emails = response.data;
+        
+        if (emails.length > 0) {
+          // Set the first email as current
+          const latest = emails[0];
+          setCurrentEmail(latest);
+          await refreshMessages(latest.id, false);
+        } else {
+          // No emails exist, auto-create one
+          toast.info('Đang tạo email mới...');
+          await createNewEmail();
+        }
+        
+        // Load history
+        await loadHistory();
+      } catch (error) {
+        console.error('Error initializing app:', error);
+      }
+    };
+    
+    initializeApp();
   }, []);
 
   // Timer countdown - calculate from expires_at
