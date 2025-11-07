@@ -557,23 +557,73 @@ function App() {
             {/* History Tab */}
             <TabsContent value="history" className="tab-content-new">
               <div className="history-section">
-                <h2 className="history-title">Lịch sử email</h2>
+                <div className="history-header">
+                  <h2 className="history-title">Lịch sử email</h2>
+                  {historyEmails.length > 0 && (
+                    <div className="history-actions">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={toggleSelectAll}
+                        className="select-all-btn"
+                      >
+                        {selectedHistoryIds.length === historyEmails.length ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={deleteSelectedHistory}
+                        disabled={selectedHistoryIds.length === 0 || loading}
+                        className="delete-selected-btn"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Xóa đã chọn ({selectedHistoryIds.length})
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={deleteAllHistory}
+                        disabled={loading}
+                        className="delete-all-btn"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Xóa tất cả
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
                 {historyEmails.length === 0 ? (
                   <div className="empty-state">
                     <History className="empty-icon" />
                     <h4 className="empty-title">Chưa có lịch sử</h4>
-                    <p className="empty-description">Các email cũ sẽ được lưu tại đây</p>
+                    <p className="empty-description">Các email đã hết hạn sẽ được lưu tại đây</p>
                   </div>
                 ) : (
                   <ScrollArea className="history-list">
                     {historyEmails.map((email) => (
-                      <Card key={email.id} className="history-card" onClick={() => switchToHistoryEmail(email)}>
+                      <Card 
+                        key={email.id} 
+                        className={`history-card ${selectedHistoryIds.includes(email.id) ? 'selected' : ''}`}
+                      >
                         <CardContent className="history-card-content">
-                          <div className="history-info">
+                          <input
+                            type="checkbox"
+                            checked={selectedHistoryIds.includes(email.id)}
+                            onChange={() => toggleHistorySelection(email.id)}
+                            className="history-checkbox"
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                          <div 
+                            className="history-info"
+                            onClick={() => viewHistoryEmail(email)}
+                          >
                             <Mail className="h-5 w-5 history-icon" />
                             <div className="history-details">
                               <p className="history-address">{email.address}</p>
-                              <span className="history-time">{getTimeAgo(email.created_at)}</span>
+                              <span className="history-time">
+                                Hết hạn: {getTimeAgo(email.expired_at)}
+                              </span>
                             </div>
                           </div>
                         </CardContent>
