@@ -485,6 +485,30 @@ test_plan:
     - Backend APIs fully functional for frontend integration
 
 agent_communication:
+  - agent: "testing"
+    message: |
+      ✅ BACKEND TESTING COMPLETE - EMAIL EXPIRY FEATURES VERIFIED
+      
+      Test Summary: 14/14 tests passed
+      
+      Key Findings:
+      1. ✅ Create Email with Expiry - expires_at correctly set to created_at + 10 minutes
+      2. ✅ Get Emails - all emails include expires_at field
+      3. ✅ Extend Time - correctly resets to NOW + 10 minutes (not cumulative)
+      4. ✅ Email History List - returns empty array (no expired emails yet)
+      5. ✅ History Messages - endpoint functional, returns 404 for non-existent
+      6. ✅ Delete History Selective - works with specific IDs
+      7. ✅ Delete History All - works with null/empty IDs
+      8. ✅ Refresh Messages - no regression, still works
+      9. ✅ Background Task - confirmed running, checks every 30s
+      10. ✅ Error Handling - proper 404 responses
+      
+      All datetime fields use ISO 8601 format with timezone.
+      MongoDB integration working correctly in container.
+      
+      Recommendation: Backend is production-ready for email expiry features.
+      Frontend testing not performed (system limitation).
+      
   - agent: "main"
     message: |
       ✅ HOÀN THÀNH CHUYỂN ĐỔI MONGODB → MYSQL + FAVICON
