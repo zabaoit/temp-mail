@@ -28,7 +28,10 @@ class TempMailAPITester:
             elif method == 'POST':
                 response = requests.post(url, json=data, headers=headers, timeout=30)
             elif method == 'DELETE':
-                response = requests.delete(url, headers=headers, timeout=30)
+                if data is not None:
+                    response = requests.delete(url, json=data, headers=headers, timeout=30)
+                else:
+                    response = requests.delete(url, headers=headers, timeout=30)
 
             success = response.status_code == expected_status
             if success:
