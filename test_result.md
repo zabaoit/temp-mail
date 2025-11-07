@@ -241,6 +241,31 @@ infrastructure:
     stuck_count: 0
     priority: "high"
     needs_retesting: false
+
+  - task: "Thêm UI cho lịch sử email với tính năng xóa"
+    implemented: true
+    working: "testing"
+    file: "src/App.js, src/App.css"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "testing"
+        agent: "main"
+        comment: |
+          ✅ Frontend - Tính năng lịch sử email:
+          1. Timer dựa vào expires_at từ backend (real-time countdown)
+          2. Nút "Làm mới 10 phút": Gọi API extend-time, reset về 10 phút
+          3. Auto-reload email mới khi hết hạn
+          4. Load history từ API /emails/history/list
+          5. History Tab với:
+             - Checkbox cho mỗi email
+             - Nút "Chọn tất cả" / "Bỏ chọn tất cả"
+             - Nút "Xóa đã chọn (N)" - hiển thị số lượng đã chọn
+             - Nút "Xóa tất cả" - màu đỏ
+             - Click vào email để xem tin nhắn history
+          6. CSS styling cho selected state và actions
+
     status_history:
       - working: "NA"
         agent: "main"
