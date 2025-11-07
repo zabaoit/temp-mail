@@ -53,9 +53,10 @@ function App() {
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(600); // 10 minutes in seconds
+  const [timeLeft, setTimeLeft] = useState(0); // Calculated from expires_at
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [activeTab, setActiveTab] = useState('current');
+  const [selectedHistoryIds, setSelectedHistoryIds] = useState([]);
 
   // Load emails on mount
   useEffect(() => {
