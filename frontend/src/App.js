@@ -183,9 +183,27 @@ function App() {
     }
   };
 
-  const addTime = () => {
-    setTimeLeft(prev => prev + 600); // Add 10 more minutes
-    toast.success('Đã thêm 10 phút');
+  const addTime = async () => {
+    if (!currentEmail) return;
+    
+    setLoading(true);
+    try {
+      const response = await axios.post(`${API}/emails/${currentEmail.id}/extend-time`);
+      
+      // Update currentEmail with new expires_at
+      setCurrentEmail(prev => ({
+        ...prev,
+        expires_at: response.data.expires_at
+      }));
+      
+      toast.success('Đã làm mới thời gian về 10 phút');
+    } catch (error) {
+      toast.error('Không thể gia hạn thời gian', {
+        description: error.response?.data?.detail || 'Lỗi không xác định'
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const refreshMessages = async (emailId, showToast = true) => {
