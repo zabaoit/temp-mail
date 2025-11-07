@@ -246,20 +246,79 @@ function App() {
     }
   };
 
-  const switchToHistoryEmail = async (email) => {
-    // Move current to history
-    if (currentEmail) {
-      setHistoryEmails(prev => [currentEmail, ...prev.filter(e => e.id !== email.id)]);
+  const viewHistoryEmail = async (email) => {
+    // Just view messages from history email, don't make it current
+    try {
+      const response = await axios.get(`${API}/emails/history/${email.id}/messages`);
+      setMessages(response.data.messages);
+      setSelectedMessage(null);
+      // Temporarily set as "current" for viewing
+      setCurrentEmail({ ...email, isHistory: true });
+    } catch (error) {
+      toast.error('Không thể tải tin nhắn từ lịch sử');
     }
-    
-    // Set selected history email as current
-    setCurrentEmail(email);
-    setHistoryEmails(prev => prev.filter(e => e.id !== email.id));
-    setTimeLeft(600);
-    setMessages([]);
-    setSelectedMessage(null);
-    await refreshMessages(email.id, false);
-    setActiveTab('current');
+  };
+
+  const toggleHistorySelection = (emailId) => {
+    setSelectedHistoryIds(prev => {
+      if (prev.includes(emailId)) {
+        return prev.filter(id => id !== emailId);
+      } else {
+        return [...prev, emailId];
+      }
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedHistoryIds.length === historyEmails.length) {
+      setSelectedHistoryIds([]);
+    } else {
+      setSelectedHistoryIds(historyEmails.map(e => e.id));
+    }
+  };
+
+  const deleteSelectedHistory = async () => {
+    if (selectedHistoryIds.length === 0) {
+      toast.warning('Chưa chọn email nào');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await axios.delete(`${API}/emails/history/delete`, {
+        data: { ids: selectedHistoryIds }
+      });
+      
+      toast.success(`Đã xóa ${selectedHistoryIds.length} email`);
+      setSelectedHistoryIds([]);
+      await loadHistory();
+    } catch (error) {
+      toast.error('Không thể xóa email đã chọn');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteAllHistory = async () => {
+    if (historyEmails.length === 0) {
+      toast.warning('Lịch sử trống');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await axios.delete(`${API}/emails/history/delete`, {
+        data: { ids: null }
+      });
+      
+      toast.success('Đã xóa tất cả lịch sử');
+      setSelectedHistoryIds([]);
+      setHistoryEmails([]);
+    } catch (error) {
+      toast.error('Không thể xóa tất cả lịch sử');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const copyToClipboard = (text) => {
