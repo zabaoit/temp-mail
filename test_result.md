@@ -313,13 +313,18 @@ infrastructure:
 
 metadata:
   created_by: "main_agent"
-  version: "1.0"
-  test_sequence: 0
+  version: "2.0"
+  test_sequence: 1
   run_ui: false
-  environment: "local"
-  database: "MySQL 8.0+"
+  environment: "container(MongoDB) / local(MySQL)"
+  database: "MongoDB (container) / MySQL 8.0+ (local)"
   backend_port: 8001
-  frontend_port: 7050
+  frontend_port: 3000
+  features:
+    - "Auto-expire emails after 10 minutes"
+    - "Auto-create new email when expired"
+    - "Email history with selective deletion"
+    - "Extend time (reset to 10 minutes)"
 
 test_plan:
   current_focus:
