@@ -7,13 +7,13 @@ import logging
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import httpx
 import random
 import string
 
 from database import engine, get_db, Base
-from models import TempEmail as TempEmailModel
+from models import TempEmail as TempEmailModel, EmailHistory as EmailHistoryModel
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
