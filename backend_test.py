@@ -1,7 +1,7 @@
 import requests
 import sys
 import time
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
 class TempMailAPITester:
     def __init__(self, base_url="https://email-cycle-system.preview.emergentagent.com"):
@@ -10,6 +10,7 @@ class TempMailAPITester:
         self.tests_run = 0
         self.tests_passed = 0
         self.created_emails = []
+        self.history_emails = []
 
     def run_test(self, name, method, endpoint, expected_status, data=None, headers=None):
         """Run a single API test"""
