@@ -284,6 +284,85 @@ async def delete_email(email_id: str, db: Session = Depends(get_db)):
     
     return {"status": "deleted"}
 
+
+@api_router.post("/emails/{email_id}/extend-time")
+async def extend_email_time(email_id: str, db: Session = Depends(get_db)):
+    """Extend email expiry time by resetting to 10 minutes from now"""
+    email = db.query(TempEmailModel).filter(TempEmailModel.id == email_id).first()
+    if not email:
+        raise HTTPException(status_code=404, detail="Email not found")
+    
+    # Reset expires_at to 10 minutes from now (not add to existing time)
+    now = datetime.now(timezone.utc)
+    email.expires_at = now + timedelta(minutes=10)
+    
+    db.commit()
+    db.refresh(email)
+    
+    return {
+        "status": "extended",
+        "expires_at": email.expires_at.isoformat()
+    }
+
+
+@api_router.get("/emails/history/list", response_model=List[EmailHistorySchema])
+async def get_email_history(db: Session = Depends(get_db)):
+    """Get all emails in history"""
+    history = db.query(EmailHistoryModel).order_by(EmailHistoryModel.expired_at.desc()).all()
+    return history
+
+
+@api_router.get("/emails/history/{email_id}/messages")
+async def get_history_email_messages(email_id: str, db: Session = Depends(get_db)):
+    """Get messages for a history email"""
+    email = db.query(EmailHistoryModel).filter(EmailHistoryModel.id == email_id).first()
+    if not email:
+        raise HTTPException(status_code=404, detail="Email not found in history")
+    
+    # Get messages from Mail.tm using the stored token
+    messages = await get_mailtm_messages(email.token)
+    
+    return {"messages": messages, "count": len(messages)}
+
+
+@api_router.get("/emails/history/{email_id}/messages/{message_id}")
+async def get_history_message_detail(email_id: str, message_id: str, db: Session = Depends(get_db)):
+    """Get message detail for a history email"""
+    email = db.query(EmailHistoryModel).filter(EmailHistoryModel.id == email_id).first()
+    if not email:
+        raise HTTPException(status_code=404, detail="Email not found in history")
+    
+    message = await get_mailtm_message_detail(email.token, message_id)
+    if not message:
+        raise HTTPException(status_code=404, detail="Message not found")
+    
+    return message
+
+
+@api_router.delete("/emails/history/delete")
+async def delete_history_emails(request: DeleteHistoryRequest, db: Session = Depends(get_db)):
+    """Delete history emails. If ids is None or empty, delete all"""
+    try:
+        if request.ids and len(request.ids) > 0:
+            # Delete specific emails by IDs
+            deleted_count = db.query(EmailHistoryModel).filter(
+                EmailHistoryModel.id.in_(request.ids)
+            ).delete(synchronize_session=False)
+        else:
+            # Delete all history emails
+            deleted_count = db.query(EmailHistoryModel).delete()
+        
+        db.commit()
+        
+        return {
+            "status": "deleted",
+            "count": deleted_count
+        }
+    except Exception as e:
+        db.rollback()
+        logging.error(f"Error deleting history emails: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+
 # Include the router in the main app
 app.include_router(api_router)
 
