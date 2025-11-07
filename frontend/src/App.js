@@ -172,18 +172,10 @@ function App() {
       
       toast.success('Email đã được xóa');
       
-      // Load next email from history or create new
-      if (historyEmails.length > 0) {
-        const nextEmail = historyEmails[0];
-        setCurrentEmail(nextEmail);
-        setHistoryEmails(prev => prev.slice(1));
-        await refreshMessages(nextEmail.id, false);
-        setTimeLeft(600);
-      } else {
-        setCurrentEmail(null);
-        setMessages([]);
-        setSelectedMessage(null);
-      }
+      // Clear current email
+      setCurrentEmail(null);
+      setMessages([]);
+      setSelectedMessage(null);
     } catch (error) {
       toast.error('Không thể xóa email');
     } finally {
