@@ -1138,6 +1138,10 @@ body {
     padding: var(--spacing-md);
   }
   
+  .tab-content-new {
+    padding: 0 var(--spacing-sm);
+  }
+  
   .hero-section {
     padding: var(--spacing-xl);
   }
@@ -1179,5 +1183,19 @@ body {
   .delete-all-btn {
     width: 100%;
     justify-content: center;
+  }
+  
+  .message-detail,
+  .detail-card,
+  .hero-section,
+  .messages-section,
+  .history-section {
+    max-width: 100%;
+    padding-left: var(--spacing-md);
+    padding-right: var(--spacing-md);
+  }
+  
+  .detail-content {
+    padding: var(--spacing-md);
   }
 }
