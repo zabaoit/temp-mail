@@ -30,11 +30,18 @@ next-env.d.ts
 dist/
 dist
 
+<<<<<<< HEAD
 # Sensitive credentials (DO NOT COMMIT)
 *token.json*
 *credentials.json*
 *.key
 *.pem
+=======
+# Environment files (comprehensive coverage)
+
+*token.json*
+*credentials.json*
+>>>>>>> 9802088c29fbefbb5fe355e8fdb4e970da82d1fe
 
 # Logs and debug files
 npm-debug.log*
@@ -45,6 +52,7 @@ dump.rdb
 
 # System files
 .DS_Store
+<<<<<<< HEAD
 
 # Python
 __pycache__/
@@ -52,6 +60,15 @@ __pycache__/
 venv/
 .venv/
 *.egg-info/
+=======
+*.pem
+
+# Python
+__pycache__/
+*pyc*
+venv/
+.venv/
+>>>>>>> 9802088c29fbefbb5fe355e8fdb4e970da82d1fe
 
 # Development tools
 chainlit.md
@@ -64,8 +81,11 @@ chainlit.md
 
 # Data and databases
 agenthub/agents/youtube/db
+<<<<<<< HEAD
 *.sqlite
 *.db
+=======
+>>>>>>> 9802088c29fbefbb5fe355e8fdb4e970da82d1fe
 
 # Archive files and large assets
 **/*.zip
@@ -80,6 +100,7 @@ agenthub/agents/youtube/db
 .cache/
 
 # Mobile development
+<<<<<<< HEAD
 android-sdk/
 
 # Environment files - SELECTIVE IGNORE
@@ -210,6 +231,9 @@ android-sdk/
 *.env
 *.env.*
 -e 
+=======
+android-sdk/ -e 
+>>>>>>> 9802088c29fbefbb5fe355e8fdb4e970da82d1fe
 # Environment files
 *.env
 *.env.*

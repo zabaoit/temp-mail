@@ -100,6 +100,7 @@
 
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
+<<<<<<< HEAD
 #====================================================================================================
 
 user_problem_statement: |
@@ -1188,3 +1189,6 @@ agent_communication:
       ✅ SMTPLabs account created with key2: test@test.smtp.dev
       ✅ Successfully created email with SMTPLabs key2
       ```
+=======
+#====================================================================================================
+>>>>>>> 9802088c29fbefbb5fe355e8fdb4e970da82d1fe

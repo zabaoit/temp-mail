@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 📧 TempMail Application - Ứng Dụng Email Tạm Thời
 
 Ứng dụng tạo và quản lý email tạm thời sử dụng Mail.tm API, được xây dựng với FastAPI (Backend), React (Frontend), và MySQL (Database).
@@ -141,3 +142,6 @@ Contributions, issues, and feature requests are welcome!
 ---
 
 **Made with ❤️ using FastAPI + React + MySQL**
+=======
+# Here are your Instructions
+>>>>>>> 9802088c29fbefbb5fe355e8fdb4e970da82d1fe
