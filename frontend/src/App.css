@@ -510,33 +510,38 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: var(--shadow-md);
 }
 
-/* Empty State */
+/* Premium Empty State */
 .empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 4rem 2rem;
+  padding: 5rem 2rem;
   text-align: center;
 }
 
 .empty-icon {
-  width: 80px;
-  height: 80px;
-  color: var(--text-muted);
-  margin-bottom: 1.5rem;
+  width: 100px;
+  height: 100px;
+  color: var(--accent-primary);
+  margin-bottom: 2rem;
+  opacity: 0.8;
+  animation: float 3s ease-in-out infinite;
+  filter: drop-shadow(0 4px 12px rgba(139, 92, 246, 0.3));
 }
 
 .empty-title {
-  font-size: 1.5rem;
-  font-weight: 600;
+  font-size: 1.75rem;
+  font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.02em;
 }
 
 .empty-description {
-  font-size: 1rem;
+  font-size: 1.1rem;
   color: var(--text-secondary);
+  font-weight: 400;
 }
 
 .empty-state-main {
@@ -544,42 +549,48 @@ h1, h2, h3, h4, h5, h6 {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 6rem 2rem;
+  padding: 8rem 2rem;
   text-align: center;
 }
 
 .empty-icon-large {
-  width: 120px;
-  height: 120px;
-  color: var(--text-muted);
-  margin-bottom: 2rem;
+  width: 140px;
+  height: 140px;
+  color: var(--accent-primary);
+  margin-bottom: 2.5rem;
+  animation: float 3s ease-in-out infinite;
+  filter: drop-shadow(0 6px 16px rgba(139, 92, 246, 0.4));
 }
 
 .empty-title-large {
-  font-size: 2rem;
-  font-weight: 600;
+  font-size: 2.5rem;
+  font-weight: 800;
   color: var(--text-primary);
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
+  letter-spacing: -0.03em;
 }
 
 .empty-description-large {
-  font-size: 1.125rem;
+  font-size: 1.25rem;
   color: var(--text-secondary);
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
 }
 
 .create-btn-large {
-  padding: 1rem 2rem;
-  font-size: 1.125rem;
-  background: var(--accent);
+  padding: 1.25rem 2.5rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  background: var(--accent-gradient);
   color: white;
   border: none;
-  border-radius: 8px;
-  transition: background 0.2s;
+  border-radius: 16px;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-lg);
 }
 
 .create-btn-large:hover {
-  background: var(--accent-hover);
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: var(--shadow-xl);
 }
 
 /* Messages List */
