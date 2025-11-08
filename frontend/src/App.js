@@ -763,18 +763,25 @@ function App() {
                                 <TabsTrigger value="text">Text</TabsTrigger>
                               </TabsList>
                               <TabsContent value="html" className="message-content">
-                                {selectedMessage.html && selectedMessage.html.length > 0 ? (
+                                {selectedMessage.html && Array.isArray(selectedMessage.html) && selectedMessage.html.length > 0 && selectedMessage.html[0] ? (
                                   <div
                                     className="html-content"
                                     dangerouslySetInnerHTML={{ __html: selectedMessage.html[0] }}
+                                  />
+                                ) : selectedMessage.html && typeof selectedMessage.html === 'string' && selectedMessage.html.trim() ? (
+                                  <div
+                                    className="html-content"
+                                    dangerouslySetInnerHTML={{ __html: selectedMessage.html }}
                                   />
                                 ) : (
                                   <p className="no-content">Không có nội dung HTML</p>
                                 )}
                               </TabsContent>
                               <TabsContent value="text" className="message-content">
-                                {selectedMessage.text && selectedMessage.text.length > 0 ? (
+                                {selectedMessage.text && Array.isArray(selectedMessage.text) && selectedMessage.text.length > 0 && selectedMessage.text[0] ? (
                                   <div className="text-content">{selectedMessage.text[0]}</div>
+                                ) : selectedMessage.text && typeof selectedMessage.text === 'string' && selectedMessage.text.trim() ? (
+                                  <div className="text-content">{selectedMessage.text}</div>
                                 ) : (
                                   <p className="no-content">Không có nội dung text</p>
                                 )}
