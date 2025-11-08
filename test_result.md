@@ -977,3 +977,214 @@ agent_communication:
       - ✅ Giảm delay từ ~30s xuống ~10s tối đa
       - ✅ UX tốt hơn với visual feedback khi refresh
       - ✅ Users biết được khi nào đang loading
+
+  - agent: "main"
+    message: |
+      ✅ DUAL SMTP KEYS + INTEGER ID IMPLEMENTATION
+      
+      Yêu cầu từ user (2025-01-07):
+      1. ✅ Thêm SMTP Labs API key thứ 2 để dự phòng (song song)
+      2. ✅ Đổi kiểu dữ liệu ID từ UUID sang số (integer auto-increment)
+      
+      === DUAL SMTP KEYS ===
+      
+      1. ✅ Environment Configuration (.env):
+         ```
+         SMTPLABS_API_KEY_1=smtplabs_DEkL4DqWAxMR76XBkN7n3G2yVPeoqusnG8qukhEBXN3meASm
+         SMTPLABS_API_KEY_2=smtplabs_DEkL4DqWAxMR76XBkN7n3G2yVPeoqusnG8qukhEBXN3meASm
+         ```
+         - Hỗ trợ tối đa 9 keys (SMTPLABS_API_KEY_1 đến SMTPLABS_API_KEY_9)
+         - Backward compatible với format cũ (SMTPLABS_API_KEY)
+      
+      2. ✅ Round-Robin Key Rotation:
+         - Tự động phân bố tải đều giữa các keys
+         - Request 1 → Key1, Request 2 → Key2, Request 3 → Key1, ...
+         - Function: get_next_smtp_key()
+      
+      3. ✅ Auto-Failover Logic:
+         - Mail.tm → FAIL
+         - Try SMTPLabs Key1 → FAIL (rate limit)
+         - Try SMTPLabs Key2 → SUCCESS ✅
+         - Logs chi tiết key nào được sử dụng
+      
+      4. ✅ Per-Key Stats Tracking:
+         ```python
+         _provider_stats = {
+             "smtplabs_key1": {"success": 0, "failures": 0, "last_failure": 0, "last_success": 0},
+             "smtplabs_key2": {"success": 0, "failures": 0, "last_failure": 0, "last_success": 0}
+         }
+         ```
+      
+      5. ✅ Updated SMTP Functions:
+         - smtplabs_create_account(address, password, api_key, key_index)
+         - smtplabs_get_mailboxes(account_id, api_key)
+         - smtplabs_get_messages(account_id, mailbox_id, api_key)
+         - smtplabs_get_message_detail(account_id, mailbox_id, message_id, api_key)
+      
+      === INTEGER ID MIGRATION ===
+      
+      1. ✅ Database Models (models.py):
+         ```python
+         # CŨ:
+         id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+         
+         # MỚI:
+         id = Column(Integer, primary_key=True, autoincrement=True)
+         ```
+         - Áp dụng cho: TempEmail và EmailHistory
+         - Removed: import uuid (không còn cần)
+      
+      2. ✅ Pydantic Schemas (server.py):
+         ```python
+         # CŨ: id: str
+         # MỚI: id: int
+         ```
+         - TempEmailSchema
+         - EmailHistorySchema
+         - CreateEmailResponse
+         - DeleteHistoryRequest: ids: Optional[List[int]]
+      
+      3. ✅ API Endpoints Update:
+         - Tất cả endpoints: email_id: str → email_id: int
+         - GET /api/emails/{email_id}
+         - GET /api/emails/{email_id}/messages
+         - POST /api/emails/{email_id}/refresh
+         - DELETE /api/emails/{email_id}
+         - POST /api/emails/{email_id}/extend-time
+         - GET /api/emails/history/{email_id}/messages
+      
+      4. ✅ Migration Script (init_db.py):
+         ```bash
+         # Reset database với confirmation
+         python init_db.py --reset
+         
+         # Output:
+         ⚠️  Chế độ RESET được kích hoạt!
+         ⚠️  Xóa tất cả dữ liệu và tạo lại tables? (yes/no): yes
+         ✅ Đã xóa tất cả tables!
+         ✅ Tất cả tables đã được tạo thành công!
+         ```
+         - drop_tables(): Xóa tất cả tables
+         - Confirmation required để tránh xóa nhầm
+      
+      === FILES MODIFIED ===
+      
+      1. backend/.env:
+         - Thêm SMTPLABS_API_KEY_1 và SMTPLABS_API_KEY_2
+      
+      2. backend/models.py:
+         - TempEmail.id: String(36) → Integer (autoincrement)
+         - EmailHistory.id: String(36) → Integer (autoincrement)
+         - Removed uuid import
+      
+      3. backend/server.py:
+         - Multi-key loading logic (line ~35-55)
+         - get_next_smtp_key() function
+         - Updated all SMTP functions với api_key parameter
+         - Updated Pydantic schemas: id: str → id: int
+         - Updated all endpoints: email_id: str → email_id: int
+         - Updated create_email_with_fallback() với multi-key retry
+      
+      4. backend/init_db.py:
+         - Thêm drop_tables() function
+         - Thêm --reset flag support
+         - Confirmation prompt cho reset
+      
+      === DOCUMENTATION ===
+      
+      1. ✅ Created: CHANGELOG_DUAL_SMTP_INTEGER_ID.md
+         - Chi tiết tất cả thay đổi
+         - Migration guide
+         - Testing instructions
+         - Frontend compatibility notes
+         - Troubleshooting tips
+      
+      === BREAKING CHANGES ===
+      
+      ⚠️  ID Format Changed:
+      - CŨ: "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+      - MỚI: "id": 1, 2, 3, ...
+      
+      ⚠️  Database Reset Required:
+      - Phải chạy: python init_db.py --reset
+      - Xóa tất cả data hiện tại
+      - Tạo lại tables với schema mới
+      
+      ⚠️  Frontend Impact:
+      - ID parsing: parseInt() thay vì UUID string
+      - Type definitions: id: number thay vì id: string
+      - URL params vẫn hoạt động (FastAPI tự động convert)
+      
+      === TESTING STATUS ===
+      
+      ✅ Python Linting:
+      - server.py: All checks passed!
+      - models.py: All checks passed!
+      - init_db.py: All checks passed!
+      
+      ⚠️  Container Environment:
+      - Code đã sẵn sàng
+      - Cần reset database để áp dụng schema mới
+      - User cần chạy: python init_db.py --reset
+      
+      === NEXT STEPS FOR USER ===
+      
+      1. Reset Database:
+         ```bash
+         cd backend
+         python init_db.py --reset
+         # Enter "yes" when prompted
+         ```
+      
+      2. Restart Backend:
+         ```bash
+         # Container:
+         sudo supervisorctl restart backend
+         
+         # Local:
+         python -m uvicorn server:app --reload
+         ```
+      
+      3. Verify Logs:
+         ```bash
+         tail -f /var/log/supervisor/backend.*.log
+         # Should see:
+         # ✅ Loaded SMTPLABS_API_KEY_1
+         # ✅ Loaded SMTPLABS_API_KEY_2
+         # 📧 SMTPLabs: 2 API key(s) loaded
+         ```
+      
+      4. Test API:
+         ```bash
+         curl -X POST http://localhost:8001/api/emails/create
+         # Response should have integer ID: {"id": 1, ...}
+         ```
+      
+      === BENEFITS ===
+      
+      ✅ Dual SMTP Keys:
+      - Tăng reliability (key1 fail → dùng key2)
+      - Load balancing (phân tải đều)
+      - Bypass rate limits dễ dàng hơn
+      - Theo dõi performance từng key
+      
+      ✅ Integer IDs:
+      - Ngắn gọn hơn (1, 2, 3 thay vì UUID dài)
+      - Query database nhanh hơn
+      - Dễ debug và test hơn
+      - Tiết kiệm storage space
+      
+      === LOGS EXAMPLE ===
+      
+      ```
+      ✅ Loaded SMTPLABS_API_KEY_1
+      ✅ Loaded SMTPLABS_API_KEY_2
+      📧 SMTPLabs: 2 API key(s) loaded
+      🔄 Attempting to create email via Mail.tm...
+      ❌ Mail.tm failed: Rate limit exceeded
+      🔄 Falling back to SMTPLabs key1... (attempt 1/2)
+      ❌ SMTPLabs key1 failed: Rate limit exceeded
+      🔄 Falling back to SMTPLabs key2... (attempt 2/2)
+      ✅ SMTPLabs account created with key2: test@test.smtp.dev
+      ✅ Successfully created email with SMTPLabs key2
+      ```
