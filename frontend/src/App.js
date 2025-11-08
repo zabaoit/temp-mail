@@ -763,28 +763,68 @@ function App() {
                                 <TabsTrigger value="text">Text</TabsTrigger>
                               </TabsList>
                               <TabsContent value="html" className="message-content">
-                                {selectedMessage.html && Array.isArray(selectedMessage.html) && selectedMessage.html.length > 0 && selectedMessage.html[0] ? (
-                                  <div
-                                    className="html-content"
-                                    dangerouslySetInnerHTML={{ __html: selectedMessage.html[0] }}
-                                  />
-                                ) : selectedMessage.html && typeof selectedMessage.html === 'string' && selectedMessage.html.trim() ? (
-                                  <div
-                                    className="html-content"
-                                    dangerouslySetInnerHTML={{ __html: selectedMessage.html }}
-                                  />
-                                ) : (
-                                  <p className="no-content">Không có nội dung HTML</p>
-                                )}
+                                {(() => {
+                                  // Enhanced HTML content rendering with better error handling
+                                  const htmlContent = selectedMessage.html;
+                                  
+                                  // Check if content exists and is not empty
+                                  if (!htmlContent) {
+                                    return <p className="no-content">Không có nội dung HTML</p>;
+                                  }
+                                  
+                                  // Handle array format
+                                  if (Array.isArray(htmlContent)) {
+                                    const content = htmlContent[0];
+                                    if (content && typeof content === 'string' && content.trim()) {
+                                      return (
+                                        <div
+                                          className="html-content"
+                                          dangerouslySetInnerHTML={{ __html: content }}
+                                        />
+                                      );
+                                    }
+                                  }
+                                  
+                                  // Handle string format
+                                  if (typeof htmlContent === 'string' && htmlContent.trim()) {
+                                    return (
+                                      <div
+                                        className="html-content"
+                                        dangerouslySetInnerHTML={{ __html: htmlContent }}
+                                      />
+                                    );
+                                  }
+                                  
+                                  // No valid content found
+                                  return <p className="no-content">Không có nội dung HTML</p>;
+                                })()}
                               </TabsContent>
                               <TabsContent value="text" className="message-content">
-                                {selectedMessage.text && Array.isArray(selectedMessage.text) && selectedMessage.text.length > 0 && selectedMessage.text[0] ? (
-                                  <div className="text-content">{selectedMessage.text[0]}</div>
-                                ) : selectedMessage.text && typeof selectedMessage.text === 'string' && selectedMessage.text.trim() ? (
-                                  <div className="text-content">{selectedMessage.text}</div>
-                                ) : (
-                                  <p className="no-content">Không có nội dung text</p>
-                                )}
+                                {(() => {
+                                  // Enhanced text content rendering
+                                  const textContent = selectedMessage.text;
+                                  
+                                  // Check if content exists and is not empty
+                                  if (!textContent) {
+                                    return <p className="no-content">Không có nội dung text</p>;
+                                  }
+                                  
+                                  // Handle array format
+                                  if (Array.isArray(textContent)) {
+                                    const content = textContent[0];
+                                    if (content && typeof content === 'string' && content.trim()) {
+                                      return <div className="text-content">{content}</div>;
+                                    }
+                                  }
+                                  
+                                  // Handle string format
+                                  if (typeof textContent === 'string' && textContent.trim()) {
+                                    return <div className="text-content">{textContent}</div>;
+                                  }
+                                  
+                                  // No valid content found
+                                  return <p className="no-content">Không có nội dung text</p>;
+                                })()}
                               </TabsContent>
                             </Tabs>
                           </CardContent>
