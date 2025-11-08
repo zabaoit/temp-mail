@@ -1,12 +1,11 @@
 from sqlalchemy import Column, String, Integer, DateTime, Text
 from database import Base
 from datetime import datetime, timezone, timedelta
-import uuid
 
 class TempEmail(Base):
     __tablename__ = "temp_emails"
     
-    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(Integer, primary_key=True, autoincrement=True)
     address = Column(String(255), unique=True, nullable=False, index=True)
     password = Column(String(255), nullable=False)
     token = Column(Text, nullable=False)
@@ -46,7 +45,7 @@ class EmailHistory(Base):
     """Store expired emails for history"""
     __tablename__ = "email_history"
     
-    id = Column(String(36), primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     address = Column(String(255), nullable=False, index=True)
     password = Column(String(255), nullable=False)
     token = Column(Text, nullable=False)
