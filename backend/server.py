@@ -87,6 +87,9 @@ class TempEmailSchema(BaseModel):
     created_at: datetime
     expires_at: datetime
     message_count: int = 0
+    provider: Optional[str] = "mailtm"
+    username: Optional[str] = ""
+    domain: Optional[str] = ""
 
 
 class EmailHistorySchema(BaseModel):
