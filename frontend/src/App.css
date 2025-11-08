@@ -250,15 +250,15 @@ body {
 }
 
 .hero-title {
-  font-size: 1.25rem; /* Reduced from 1.875rem */
-  font-weight: 600;
+  font-size: 1.4rem; /* Reduced from 1.875rem */
+  font-weight: 700;
   color: var(--color-text-primary);
   margin-bottom: var(--spacing-sm); /* Reduced from md */
   letter-spacing: -0.02em;
 }
 
 .hero-description {
-  font-size: 0.9rem; /* Reduced from 1rem */
+  font-size: 1rem; /* Reduced from 1rem */
   color: var(--color-text-secondary);
   max-width: 600px;
   margin: 0 auto var(--spacing-md); /* Reduced from xl */
@@ -276,8 +276,13 @@ body {
   padding: var(--spacing-md);
   margin-bottom: var(--spacing-lg);
   box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
-  max-width: 480px;
+  max-width: 500px;    /* rộng hơn một chút (từ 500 → 540px) */
+  width: 100%;
   margin-left: auto;
   margin-right: auto;
 }
@@ -285,9 +290,10 @@ body {
 .email-address-container {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: var(--spacing-lg);
-  flex-wrap: wrap;
+  justify-content: center;  /* canh giữa theo chiều ngang */
+  gap: 0.4rem;              /* giảm khoảng cách giữa email - timer - copy */
+  flex-wrap: nowrap;
+  width: 100%;
 }
 
 .email-address {
@@ -301,9 +307,10 @@ body {
 .email-actions-inline {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 0.6rem;
+  flex-shrink: 0;
 }
-
 .email-actions-inline button {
   font-size: 0.9rem;
   padding: 0.25rem 0.7rem;
@@ -430,10 +437,13 @@ body {
 .service-selection-form {
   background: linear-gradient(135deg, var(--color-bg-secondary) 0%, var(--color-bg-tertiary) 100%);
   border: 2px solid var(--color-accent);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-xl);
-  margin-bottom: var(--spacing-xl);
-  box-shadow: var(--shadow-md);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+  max-width: 780px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .form-row {
@@ -450,8 +460,8 @@ body {
 
 .form-label {
   display: block;
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 700;
   color: var(--color-text-primary);
   margin-bottom: var(--spacing-md);
   text-transform: uppercase;
@@ -471,9 +481,9 @@ body {
   cursor: pointer;
   transition: all 0.15s ease;
   box-shadow: var(--shadow-sm);
-  appearance: none;
-  background-position: right 0.6rem center;
+  background-position: right 0.1rem bottom 0.4rem;
   background-size: 0.8rem;
+  appearance: auto;
 }
 
 .form-select:hover {
