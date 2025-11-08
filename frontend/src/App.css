@@ -330,14 +330,17 @@ body {
 .service-badge {
   display: inline-flex;
   align-items: center;
-  gap: var(--spacing-xs);
-  padding: 0.25rem 0.75rem;
-  background-color: var(--color-accent-light);
+  gap: var(--spacing-sm);
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, var(--color-accent-100) 0%, var(--color-accent-200) 100%);
   color: var(--color-accent-700);
-  border-radius: var(--radius-sm);
-  font-size: 0.875rem;
-  font-weight: 500;
-  margin-top: var(--spacing-sm);
+  border: 2px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: var(--spacing-md);
+  box-shadow: var(--shadow-sm);
+  letter-spacing: 0.3px;
 }
 
 /* ===================================
