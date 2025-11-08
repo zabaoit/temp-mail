@@ -194,7 +194,21 @@ function App() {
         // Load history
         try {
           const historyResponse = await axios.get(`${API}/emails/history/list`);
-          setHistoryEmails(historyResponse.data);
+          
+          // Deduplicate by ID to prevent duplicate key errors
+          const uniqueHistory = [];
+          const seenIds = new Set();
+          
+          for (const email of historyResponse.data) {
+            if (!seenIds.has(email.id)) {
+              seenIds.add(email.id);
+              uniqueHistory.push(email);
+            } else {
+              console.warn(`⚠️ Duplicate history email ID found and removed: ${email.id}`);
+            }
+          }
+          
+          setHistoryEmails(uniqueHistory);
         } catch (histErr) {
           console.error('Error loading history:', histErr);
         }
