@@ -88,7 +88,7 @@ _current_smtp_key_index = 0
 class TempEmailSchema(BaseModel):
     model_config = ConfigDict(extra="ignore", from_attributes=True)
     
-    id: str
+    id: int
     address: str
     password: str
     token: str
@@ -101,7 +101,7 @@ class TempEmailSchema(BaseModel):
 class EmailHistorySchema(BaseModel):
     model_config = ConfigDict(extra="ignore", from_attributes=True)
     
-    id: str
+    id: int
     address: str
     password: str
     token: str
@@ -116,14 +116,14 @@ class CreateEmailRequest(BaseModel):
 
 
 class CreateEmailResponse(BaseModel):
-    id: str
+    id: int
     address: str
     created_at: datetime
     expires_at: datetime
 
 
 class DeleteHistoryRequest(BaseModel):
-    ids: Optional[List[str]] = None
+    ids: Optional[List[int]] = None
 
 
 # Mail.tm Service Functions
