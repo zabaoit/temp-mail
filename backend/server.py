@@ -1331,13 +1331,15 @@ async def background_task_loop():
 cors_origins = os.environ.get('CORS_ORIGINS', '*')
 if cors_origins == '*':
     allow_origins = ['*']
+    allow_credentials = False  # Cannot use credentials with wildcard origin
 else:
     allow_origins = cors_origins.split(',')
+    allow_credentials = True
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allow_origins,
-    allow_credentials=True,
+    allow_credentials=allow_credentials,
     allow_methods=["*"],
     allow_headers=["*"],
 )
