@@ -667,6 +667,10 @@ function App() {
                 <Inbox className="h-4 w-4 mr-2" />
                 Email hiện tại
               </TabsTrigger>
+              <TabsTrigger value="saved" className="tab-trigger-new">
+                <Bookmark className="h-4 w-4 mr-2" />
+                Mail đã lưu ({savedEmails.length})
+              </TabsTrigger>
               <TabsTrigger value="history" className="tab-trigger-new">
                 <History className="h-4 w-4 mr-2" />
                 Lịch sử ({historyEmails.length})
