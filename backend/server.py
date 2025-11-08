@@ -30,8 +30,10 @@ app = FastAPI()
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
-# Mail.tm Configuration
+# Email Provider Configuration
 MAILTM_BASE_URL = "https://api.mail.tm"
+SMTPLABS_BASE_URL = "https://api.smtp.dev"
+SMTPLABS_API_KEY = os.environ.get('SMTPLABS_API_KEY', '')
 
 # Rate limiting tracking (in-memory)
 # In production, use Redis or database
@@ -46,6 +48,12 @@ _domain_cache = {
     "domain": None,
     "cached_at": 0,
     "ttl": 300  # Cache for 5 minutes
+}
+
+# Provider tracking for fallback
+_provider_stats = {
+    "mailtm": {"success": 0, "failures": 0, "last_failure": 0},
+    "smtplabs": {"success": 0, "failures": 0, "last_failure": 0}
 }
 
 
