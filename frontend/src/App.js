@@ -362,6 +362,7 @@ function App() {
   const loadHistory = async () => {
     try {
       const response = await axios.get(`${API}/emails/history/list`);
+      console.log('📜 Loaded history emails:', response.data);
       setHistoryEmails(response.data);
     } catch (error) {
       console.error('Error loading history:', error);
