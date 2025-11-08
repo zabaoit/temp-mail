@@ -33,10 +33,44 @@ api_router = APIRouter(prefix="/api")
 MAILTM_BASE_URL = "https://api.mail.tm"
 ONESECMAIL_BASE_URL = "https://www.1secmail.com/api/v1"
 
-# Provider stats tracking
+# Rate limiting configuration
+MAILTM_COOLDOWN_SECONDS = 60  # Cooldown after rate limit
+RETRY_MAX_ATTEMPTS = 3
+RETRY_BASE_DELAY = 1  # seconds
+
+# Domain cache
+_domain_cache = {
+    "mailtm": {"domains": [], "expires_at": 0},
+    "1secmail": {"domains": [], "expires_at": 0}
+}
+DOMAIN_CACHE_TTL = 300  # 5 minutes
+
+# Provider stats tracking with cooldown
 _provider_stats = {
-    "mailtm": {"success": 0, "failures": 0, "last_failure_time": 0},
-    "1secmail": {"success": 0, "failures": 0, "last_failure_time": 0}
+    "mailtm": {
+        "success": 0, 
+        "failures": 0, 
+        "last_failure_time": 0,
+        "cooldown_until": 0,
+        "rate_limited": False
+    },
+    "1secmail": {
+        "success": 0, 
+        "failures": 0, 
+        "last_failure_time": 0,
+        "cooldown_until": 0,
+        "rate_limited": False
+    }
+}
+
+# Browser headers to bypass 403
+BROWSER_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Accept": "application/json, text/plain, */*",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Referer": "https://www.1secmail.com/",
+    "Origin": "https://www.1secmail.com"
 }
 
 # Pydantic Models
