@@ -39,7 +39,10 @@ class TempEmail(Base):
             "account_id": self.account_id,
             "created_at": created_at.isoformat(),
             "expires_at": expires_at.isoformat(),  # NEW
-            "message_count": self.message_count
+            "message_count": self.message_count,
+            "provider": self.provider,
+            "username": self.username,
+            "domain": self.domain
         }
 
 
