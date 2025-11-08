@@ -430,43 +430,53 @@ async def create_email_with_fallback(username: str = None):
         _provider_stats["mailtm"]["last_failure"] = time.time()
         logging.warning(f"❌ Mail.tm failed: {error_msg}")
     
-    # Strategy 2: Fallback to SMTPLabs
-    if SMTPLABS_API_KEY:
-        try:
-            logging.info("🔄 Falling back to SMTPLabs...")
-            
-            # SMTPLabs needs custom domain from their service
-            # Generate a unique email with smtp.dev domain
-            if not username:
-                username = ''.join(random.choices(string.ascii_lowercase + string.digits, k=10))
-            
-            # SMTPLabs allows custom domains but we'll use a test pattern
-            address = f"{username}@test.smtp.dev"  # Use their test domain
-            password = ''.join(random.choices(string.ascii_letters + string.digits, k=16))
-            
-            # Create account
-            account_data = await smtplabs_create_account(address, password)
-            
-            # Get mailboxes to find inbox
-            mailboxes = await smtplabs_get_mailboxes(account_data["id"])
-            inbox_id = mailboxes[0]["id"] if mailboxes else None
-            
-            return {
-                "provider": "smtplabs",
-                "address": address,
-                "password": password,
-                "token": SMTPLABS_API_KEY,  # SMTPLabs uses API key, not per-account token
-                "account_id": account_data["id"],
-                "mailbox_id": inbox_id
-            }
-            
-        except Exception as e:
-            error_msg = str(e)
-            errors.append(f"SMTPLabs: {error_msg}")
-            logging.error(f"❌ SMTPLabs also failed: {error_msg}")
+    # Strategy 2: Fallback to SMTPLabs with multiple keys
+    if SMTPLABS_API_KEYS:
+        # Try all available SMTP keys in order
+        for key_attempt in range(len(SMTPLABS_API_KEYS)):
+            try:
+                api_key, key_index = get_next_smtp_key()
+                if not api_key:
+                    continue
+                
+                logging.info(f"🔄 Falling back to SMTPLabs key{key_index + 1}... (attempt {key_attempt + 1}/{len(SMTPLABS_API_KEYS)})")
+                
+                # SMTPLabs needs custom domain from their service
+                # Generate a unique email with smtp.dev domain
+                if not username:
+                    username = ''.join(random.choices(string.ascii_lowercase + string.digits, k=10))
+                
+                # SMTPLabs allows custom domains but we'll use a test pattern
+                address = f"{username}@test.smtp.dev"  # Use their test domain
+                password = ''.join(random.choices(string.ascii_letters + string.digits, k=16))
+                
+                # Create account with specific key
+                account_data = await smtplabs_create_account(address, password, api_key, key_index)
+                
+                # Get mailboxes to find inbox
+                mailboxes = await smtplabs_get_mailboxes(account_data["id"], api_key)
+                inbox_id = mailboxes[0]["id"] if mailboxes else None
+                
+                logging.info(f"✅ Successfully created email with SMTPLabs key{key_index + 1}")
+                
+                return {
+                    "provider": "smtplabs",
+                    "address": address,
+                    "password": password,
+                    "token": api_key,  # SMTPLabs uses API key, not per-account token
+                    "account_id": account_data["id"],
+                    "mailbox_id": inbox_id
+                }
+                
+            except Exception as e:
+                error_msg = str(e)
+                errors.append(f"SMTPLabs key{key_index + 1}: {error_msg}")
+                logging.error(f"❌ SMTPLabs key{key_index + 1} failed: {error_msg}")
+                # Continue to next key
+                continue
     else:
-        errors.append("SMTPLabs: API key not configured")
-        logging.warning("⚠️  SMTPLabs API key not configured, cannot use as fallback")
+        errors.append("SMTPLabs: No API keys configured")
+        logging.warning("⚠️  SMTPLabs API keys not configured, cannot use as fallback")
     
     # Both providers failed
     error_detail = " | ".join(errors)
