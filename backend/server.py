@@ -762,13 +762,23 @@ async def get_domains(service: str = "auto"):
     """Get available domains for a service"""
     domains = []
     
-    if service in ["auto", "mailtm"]:
+    if service == "mailtm":
+        # Only Mail.tm domains
         mailtm_domains = await get_mailtm_domains()
         domains.extend(mailtm_domains)
-    
-    if service in ["auto", "1secmail"] and not domains:
+    elif service == "1secmail":
+        # Only 1secmail domains
         onesec_domains = await get_1secmail_domains()
         domains.extend(onesec_domains)
+    elif service == "auto":
+        # Try Mail.tm first
+        mailtm_domains = await get_mailtm_domains()
+        if mailtm_domains:
+            domains.extend(mailtm_domains)
+        else:
+            # Fallback to 1secmail if Mail.tm fails
+            onesec_domains = await get_1secmail_domains()
+            domains.extend(onesec_domains)
     
     return {"domains": domains, "service": service}
 
