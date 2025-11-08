@@ -181,6 +181,34 @@ const TempMail = () => {
     }
   };
 
+  const saveCurrentEmail = () => {
+    if (!currentEmail) {
+      alert('Không có email để lưu');
+      return;
+    }
+    
+    // Save to localStorage as saved email
+    const savedEmails = JSON.parse(localStorage.getItem('savedEmails') || '[]');
+    
+    // Check if already saved
+    const alreadySaved = savedEmails.some(email => email.email === currentEmail.email);
+    if (alreadySaved) {
+      alert('Email này đã được lưu rồi!');
+      return;
+    }
+    
+    const emailToSave = {
+      ...currentEmail,
+      savedAt: new Date().toISOString(),
+      messages: messages // Save current messages
+    };
+    
+    const newSavedEmails = [emailToSave, ...savedEmails];
+    localStorage.setItem('savedEmails', JSON.stringify(newSavedEmails));
+    
+    alert('✅ Đã lưu email thành công!');
+  };
+
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
