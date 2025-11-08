@@ -607,7 +607,38 @@ async def create_1secmail_email(username: str, domain: str = None):
 # API Routes
 @api_router.get("/")
 async def root():
-    return {"message": "TempMail API - MySQL with Expiry"}
+    return {"message": "TempMail API - Multi-Service Support"}
+
+
+@api_router.get("/services")
+async def get_services():
+    """Get list of available email services"""
+    return {
+        "services": [
+            {"id": "mailtm", "name": "Mail.tm", "description": "Free temporary email service"},
+            {"id": "mailgw", "name": "Mail.gw", "description": "Free temporary email service (Mail.tm compatible)"},
+            {"id": "1secmail", "name": "1secmail", "description": "Fast temporary email service"}
+        ]
+    }
+
+
+@api_router.get("/domains")
+async def get_domains(service: str = "mailtm"):
+    """Get available domains for a specific service"""
+    try:
+        if service == "mailtm":
+            domains = await get_mailtm_domains()
+        elif service == "mailgw":
+            domains = await get_mailgw_domains()
+        elif service == "1secmail":
+            domains = await get_1secmail_domains()
+        else:
+            raise HTTPException(status_code=400, detail=f"Unknown service: {service}")
+        
+        return {"service": service, "domains": domains}
+    except Exception as e:
+        logging.error(f"Error getting domains for {service}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @api_router.post("/emails/create", response_model=CreateEmailResponse)
