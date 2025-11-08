@@ -382,6 +382,18 @@ body {
   color: #dc2626;
 }
 
+.action-btn-save {
+  background-color: var(--color-accent);
+  color: white;
+  border-color: var(--color-accent);
+}
+
+.action-btn-save:hover:not(:disabled) {
+  background-color: var(--color-accent-dark);
+  border-color: var(--color-accent-dark);
+  color: white;
+}
+
 /* ===================================
    Service Selection Form
    =================================== */
