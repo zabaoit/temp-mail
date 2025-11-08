@@ -221,14 +221,14 @@ function App() {
     }
   }, [currentEmail, selectedService]);
 
-  // Auto refresh messages
+  // Auto refresh messages every 30 seconds
   useEffect(() => {
     if (currentEmail?.id && autoRefresh) {
       const interval = setInterval(() => {
         if (currentEmail?.id) {
           refreshMessages(currentEmail.id, false);
         }
-      }, 10000);
+      }, 30000); // 30 seconds
       return () => clearInterval(interval);
     }
   }, [currentEmail?.id, autoRefresh]);
