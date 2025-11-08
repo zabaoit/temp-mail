@@ -864,17 +864,15 @@ function App() {
                           >
                             ← Quay lại
                           </Button>
-                          {!currentEmail?.isHistory && !currentEmail?.isSaved && (
-                            <Button
-                              variant="outline"
-                              onClick={saveCurrentMessage}
-                              disabled={loading}
-                              className="save-btn"
-                            >
-                              <Bookmark className="h-4 w-4 mr-2" />
-                              Lưu email này
-                            </Button>
-                          )}
+                          <Button
+                            variant="outline"
+                            onClick={saveCurrentMessage}
+                            disabled={loading}
+                            className="save-btn"
+                          >
+                            <Bookmark className="h-4 w-4 mr-2" />
+                            Lưu email này
+                          </Button>
                         </div>
                         
                         <Card className="detail-card">
