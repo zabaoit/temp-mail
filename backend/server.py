@@ -352,29 +352,29 @@ async def get_mailtm_message_detail(token: str, message_id: str):
 
 # async def get_1secmail_message_detail(username: str, domain: str, message_id: str):
 #     """Get message detail from 1secmail"""
-    async with httpx.AsyncClient(timeout=10.0) as client:
-        try:
-            response = await client.get(
-                f"{ONESECMAIL_BASE_URL}/?action=readMessage&login={username}&domain={domain}&id={message_id}",
-                headers=BROWSER_HEADERS
-            )
-            response.raise_for_status()
-            msg = response.json()
-            
-            return {
-                "id": str(msg["id"]),
-                "from": {
-                    "address": msg.get("from", "unknown"),
-                    "name": msg.get("from", "unknown")
-                },
-                "subject": msg.get("subject", "No Subject"),
-                "createdAt": msg.get("date", datetime.now(timezone.utc).isoformat()),
-                "html": [msg.get("htmlBody", "")] if msg.get("htmlBody") else [],
-                "text": [msg.get("textBody", "")] if msg.get("textBody") else []
-            }
-        except Exception as e:
-            logging.error(f"Error getting 1secmail message detail: {e}")
-            return None
+#     async with httpx.AsyncClient(timeout=10.0) as client:
+#         try:
+#             response = await client.get(
+#                 f"{ONESECMAIL_BASE_URL}/?action=readMessage&login={username}&domain={domain}&id={message_id}",
+#                 headers=BROWSER_HEADERS
+#             )
+#             response.raise_for_status()
+#             msg = response.json()
+#             
+#             return {
+#                 "id": str(msg["id"]),
+#                 "from": {
+#                     "address": msg.get("from", "unknown"),
+#                     "name": msg.get("from", "unknown")
+#                 },
+#                 "subject": msg.get("subject", "No Subject"),
+#                 "createdAt": msg.get("date", datetime.now(timezone.utc).isoformat()),
+#                 "html": [msg.get("htmlBody", "")] if msg.get("htmlBody") else [],
+#                 "text": [msg.get("textBody", "")] if msg.get("textBody") else []
+#             }
+#         except Exception as e:
+#             logging.error(f"Error getting 1secmail message detail: {e}")
+#             return None
 
 
 # ============================================
