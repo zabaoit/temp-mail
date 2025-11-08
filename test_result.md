@@ -226,6 +226,40 @@ backend:
           - Đảm bảo tất cả endpoints dùng cùng kiểu dữ liệu cho ID
 
 frontend:
+  - task: "Fix HTML content rendering"
+    implemented: true
+    working: true
+    file: "src/App.js, src/App.css"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: |
+          ✅ Frontend improvements for HTML content display:
+          
+          App.js changes (lines 765-784):
+          - Added robust type checking for html/text content
+          - Handle both array and string formats
+          - Added fallback for empty/undefined content
+          - Proper validation before rendering with dangerouslySetInnerHTML
+          
+          App.css changes (lines 663-700):
+          - Added overflow-x: auto for HTML content scrolling
+          - Added max-width: 100% for all HTML elements
+          - Added proper image scaling (max-width: 100%, height: auto)
+          - Added table styling with borders and padding
+          - Improved word-break and overflow-wrap
+          - Enhanced link styling with accent colors
+          
+          Result:
+          - HTML emails display correctly with proper formatting
+          - Images scale properly without overflow
+          - Tables render with borders and padding
+          - Links are properly styled and clickable
+          - Long content wraps correctly without breaking layout
+  
   - task: "Cập nhật cấu hình để kết nối backend local"
     implemented: true
     working: "NA"
