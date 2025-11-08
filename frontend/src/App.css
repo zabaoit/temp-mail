@@ -593,51 +593,75 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: var(--shadow-xl);
 }
 
-/* Messages List */
+/* Modern Message Cards with Hover Effects */
 .messages-list {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  max-height: 600px;
+  gap: 1rem;
+  max-height: 650px;
 }
 
 .message-card {
   cursor: pointer;
-  transition: all 0.2s;
-  border: 1px solid var(--border);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid var(--border);
   background: var(--bg-secondary);
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.message-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--accent-gradient);
+  transform: scaleY(0);
+  transition: transform 0.3s ease;
 }
 
 .message-card:hover {
-  border-color: var(--accent);
-  box-shadow: 0 4px 6px var(--shadow);
-  transform: translateY(-2px);
+  border-color: var(--accent-primary);
+  box-shadow: var(--shadow-lg);
+  transform: translateX(8px);
+}
+
+.message-card:hover::before {
+  transform: scaleY(1);
 }
 
 .message-card-content {
-  padding: 1rem;
+  padding: 1.5rem;
 }
 
 .message-info {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.625rem;
 }
 
 .message-from {
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 1.1rem;
+  font-weight: 700;
   color: var(--text-primary);
+  letter-spacing: -0.01em;
 }
 
 .message-subject {
-  font-size: 0.875rem;
+  font-size: 0.95rem;
   color: var(--text-secondary);
+  font-weight: 500;
 }
 
 .message-time {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 /* Message Detail */
