@@ -1327,10 +1327,7 @@ async def background_task_loop():
         await asyncio.sleep(CHECK_INTERVAL)
 
 
-# Include the router in the main app
-app.include_router(api_router)
-
-# CORS configuration - MUST be after router
+# CORS configuration - MUST be BEFORE router
 cors_origins = os.environ.get('CORS_ORIGINS', '*')
 if cors_origins == '*':
     allow_origins = ['*']
@@ -1344,6 +1341,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include the router in the main app
+app.include_router(api_router)
 
 # Configure logging
 logging.basicConfig(
