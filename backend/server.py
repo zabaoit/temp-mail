@@ -618,6 +618,19 @@ async def get_guerrilla_message_detail(sid_token: str, message_id: str):
             response.raise_for_status()
             data = response.json()
             
+            # Get mail body - Guerrilla returns HTML in mail_body field
+            mail_body = data.get("mail_body", "")
+            
+            # Also try mail_excerpt as fallback
+            if not mail_body:
+                mail_body = data.get("mail_excerpt", "")
+            
+            # Ensure we have content as array (consistent with other providers)
+            html_content = [mail_body] if mail_body else []
+            text_content = [mail_body] if mail_body else []
+            
+            logging.info(f"📧 Guerrilla message detail - ID: {message_id}, Has HTML: {len(mail_body) > 0}, Length: {len(mail_body)}")
+            
             return {
                 "id": str(data.get("mail_id", message_id)),
                 "from": {
@@ -626,11 +639,11 @@ async def get_guerrilla_message_detail(sid_token: str, message_id: str):
                 },
                 "subject": data.get("mail_subject", "No Subject"),
                 "createdAt": data.get("mail_timestamp", datetime.now(timezone.utc).isoformat()),
-                "html": [data.get("mail_body", "")],
-                "text": [data.get("mail_body", "")]  # Guerrilla doesn't separate html/text clearly
+                "html": html_content,
+                "text": text_content
             }
         except Exception as e:
-            logging.error(f"Error getting Guerrilla message detail: {e}")
+            logging.error(f"❌ Error getting Guerrilla message detail: {e}")
             return None
 
 
