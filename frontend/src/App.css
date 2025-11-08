@@ -665,6 +665,34 @@ body {
   color: var(--color-text-primary);
   line-height: 1.6;
   word-break: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
+}
+
+/* Ensure HTML content renders properly */
+.html-content {
+  overflow-x: auto;
+}
+
+.html-content * {
+  max-width: 100%;
+}
+
+.html-content img {
+  max-width: 100%;
+  height: auto;
+}
+
+.html-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+
+.html-content table td,
+.html-content table th {
+  padding: 0.5rem;
+  border: 1px solid var(--color-border-light);
 }
 
 .html-content a,
