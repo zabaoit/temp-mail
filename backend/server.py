@@ -1093,6 +1093,181 @@ async def delete_history_emails(request: DeleteHistoryRequest):
         raise HTTPException(status_code=400, detail=str(e))
 
 
+# ============================================
+# SAVED EMAILS ENDPOINTS
+# ============================================
+
+@api_router.post("/emails/{email_id}/messages/{message_id}/save")
+async def save_message(email_id: int, message_id: str):
+    """Save a message to saved emails collection"""
+    try:
+        # Get the email
+        email_doc = await emails_collection.find_one({"id": email_id})
+        if not email_doc:
+            raise HTTPException(status_code=404, detail="Email not found")
+        
+        # Get message detail
+        message = None
+        provider = email_doc.get("provider", "mailtm")
+        
+        if provider == "mailtm":
+            message = await get_mailtm_message_detail(email_doc["token"], message_id)
+        elif provider == "mailgw":
+            message = await get_mailgw_message_detail(email_doc["token"], message_id)
+        elif provider == "guerrilla":
+            message = await get_guerrilla_message_detail(email_doc["address"], message_id)
+        
+        if not message:
+            raise HTTPException(status_code=404, detail="Message not found")
+        
+        # Check if already saved
+        existing = await saved_collection.find_one({
+            "email_address": email_doc["address"],
+            "message_id": message_id
+        })
+        
+        if existing:
+            return {
+                "status": "already_saved",
+                "message": "Email đã được lưu trước đó",
+                "id": existing["id"]
+            }
+        
+        # Generate new ID
+        max_id_doc = await saved_collection.find_one(sort=[("id", -1)])
+        new_id = (max_id_doc["id"] + 1) if max_id_doc else 1
+        
+        # Extract content
+        html_content = None
+        text_content = None
+        
+        if "html" in message:
+            if isinstance(message["html"], list) and len(message["html"]) > 0:
+                html_content = message["html"][0]
+            elif isinstance(message["html"], str):
+                html_content = message["html"]
+        
+        if "text" in message:
+            if isinstance(message["text"], list) and len(message["text"]) > 0:
+                text_content = message["text"][0]
+            elif isinstance(message["text"], str):
+                text_content = message["text"]
+        
+        # Create saved email document
+        saved_email = {
+            "id": new_id,
+            "email_address": email_doc["address"],
+            "message_id": message_id,
+            "subject": message.get("subject", ""),
+            "from_address": message.get("from", {}).get("address", "") if isinstance(message.get("from"), dict) else "",
+            "from_name": message.get("from", {}).get("name", "") if isinstance(message.get("from"), dict) else "",
+            "html": html_content,
+            "text": text_content,
+            "created_at": message.get("createdAt", datetime.now(timezone.utc).isoformat()),
+            "saved_at": datetime.now(timezone.utc)
+        }
+        
+        await saved_collection.insert_one(saved_email)
+        
+        logging.info(f"💾 Saved message {message_id} from {email_doc['address']}")
+        
+        return {
+            "status": "saved",
+            "message": "Email đã được lưu thành công",
+            "id": new_id
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error saving message: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/emails/saved/list")
+async def get_saved_emails():
+    """Get all saved emails"""
+    try:
+        saved_emails = await saved_collection.find().sort("saved_at", -1).to_list(length=None)
+        
+        # Convert to response format
+        result = []
+        for email in saved_emails:
+            result.append({
+                "id": email["id"],
+                "email_address": email["email_address"],
+                "message_id": email["message_id"],
+                "subject": email["subject"],
+                "from": {
+                    "address": email.get("from_address", ""),
+                    "name": email.get("from_name", "")
+                },
+                "createdAt": email["created_at"],
+                "saved_at": email["saved_at"].isoformat() if isinstance(email["saved_at"], datetime) else email["saved_at"]
+            })
+        
+        return result
+        
+    except Exception as e:
+        logging.error(f"Error getting saved emails: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/emails/saved/{saved_id}")
+async def get_saved_email_detail(saved_id: int):
+    """Get a specific saved email with full content"""
+    try:
+        saved_email = await saved_collection.find_one({"id": saved_id})
+        
+        if not saved_email:
+            raise HTTPException(status_code=404, detail="Saved email not found")
+        
+        return {
+            "id": saved_email["id"],
+            "email_address": saved_email["email_address"],
+            "message_id": saved_email["message_id"],
+            "subject": saved_email["subject"],
+            "from": {
+                "address": saved_email.get("from_address", ""),
+                "name": saved_email.get("from_name", "")
+            },
+            "html": [saved_email["html"]] if saved_email.get("html") else [],
+            "text": [saved_email["text"]] if saved_email.get("text") else [],
+            "createdAt": saved_email["created_at"],
+            "saved_at": saved_email["saved_at"].isoformat() if isinstance(saved_email["saved_at"], datetime) else saved_email["saved_at"]
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error getting saved email detail: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+class DeleteSavedRequest(BaseModel):
+    ids: Optional[List[int]] = None
+
+
+@api_router.delete("/emails/saved/delete")
+async def delete_saved_emails(request: DeleteSavedRequest):
+    """Delete saved emails. If ids is None or empty, delete all"""
+    try:
+        if request.ids and len(request.ids) > 0:
+            result = await saved_collection.delete_many({"id": {"$in": request.ids}})
+            deleted_count = result.deleted_count
+        else:
+            result = await saved_collection.delete_many({})
+            deleted_count = result.deleted_count
+        
+        return {
+            "status": "deleted",
+            "count": deleted_count
+        }
+    except Exception as e:
+        logging.error(f"Error deleting saved emails: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+
+
 @api_router.get("/domains")
 async def get_domains(service: str = "auto"):
     """Get available domains for a service"""
