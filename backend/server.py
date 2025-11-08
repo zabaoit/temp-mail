@@ -490,7 +490,30 @@ async def get_mailgw_message_detail(token: str, message_id: str):
                 headers={"Authorization": f"Bearer {token}"}
             )
             response.raise_for_status()
-            return response.json()
+            data = response.json()
+            
+            # Normalize html and text to always be arrays
+            if "html" in data:
+                if isinstance(data["html"], list):
+                    pass  # Already a list
+                elif isinstance(data["html"], str):
+                    data["html"] = [data["html"]] if data["html"] else []
+                else:
+                    data["html"] = []
+            else:
+                data["html"] = []
+            
+            if "text" in data:
+                if isinstance(data["text"], list):
+                    pass  # Already a list
+                elif isinstance(data["text"], str):
+                    data["text"] = [data["text"]] if data["text"] else []
+                else:
+                    data["text"] = []
+            else:
+                data["text"] = []
+            
+            return data
         except Exception as e:
             logging.error(f"Error getting mail.gw message detail: {e}")
             return None
