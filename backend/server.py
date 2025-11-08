@@ -47,6 +47,33 @@ AVAILABLE_SERVICES = {
     "dropmail": {"name": "DropMail", "base_url": DROPMAIL_BASE_URL}
 }
 
+# Rate limiting tracking (in-memory)
+_rate_limit_tracker = {
+    "last_create_time": 0,
+    "create_count": 0,
+    "reset_time": 0
+}
+
+# Domain cache to reduce API calls (per service)
+_domain_cache = {
+    "mailtm": {"domains": [], "cached_at": 0, "ttl": 300},
+    "mailgw": {"domains": [], "cached_at": 0, "ttl": 300},
+    "1secmail": {"domains": [], "cached_at": 0, "ttl": 300},
+    "guerrilla": {"domains": [], "cached_at": 0, "ttl": 300},
+    "tempmail_lol": {"domains": [], "cached_at": 0, "ttl": 300},
+    "dropmail": {"domains": [], "cached_at": 0, "ttl": 300}
+}
+
+# Provider tracking
+_provider_stats = {
+    "mailtm": {"success": 0, "failures": 0, "last_failure": 0},
+    "mailgw": {"success": 0, "failures": 0, "last_failure": 0},
+    "1secmail": {"success": 0, "failures": 0, "last_failure": 0},
+    "guerrilla": {"success": 0, "failures": 0, "last_failure": 0},
+    "tempmail_lol": {"success": 0, "failures": 0, "last_failure": 0},
+    "dropmail": {"success": 0, "failures": 0, "last_failure": 0}
+}
+
 
 # Pydantic Models
 class TempEmailSchema(BaseModel):
