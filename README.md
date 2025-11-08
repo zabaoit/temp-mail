@@ -102,7 +102,7 @@ CORS_ORIGINS=*
 ### Frontend: `frontend/.env`
 ```env
 REACT_APP_BACKEND_URL=http://localhost:8001
-PORT=3000
+PORT=7050
 ```
 
 ## 🐛 Troubleshooting
