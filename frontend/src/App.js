@@ -64,6 +64,10 @@ function App() {
   const [selectedDomain, setSelectedDomain] = useState('');
   const [loadingDomains, setLoadingDomains] = useState(false);
   const [showServiceForm, setShowServiceForm] = useState(false);
+  
+  // Refs to prevent race conditions
+  const isCreatingEmailRef = useRef(false);
+  const lastEmailIdRef = useRef(null);
 
   // Load services and domains
   useEffect(() => {
