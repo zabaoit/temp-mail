@@ -29,8 +29,23 @@ app = FastAPI()
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
-# Mail.tm Configuration
+# Email Provider Configuration
 MAILTM_BASE_URL = "https://api.mail.tm"
+MAILGW_BASE_URL = "https://api.mail.gw"
+ONESECMAIL_BASE_URL = "https://www.1secmail.com/api/v1"
+GUERRILLA_BASE_URL = "https://api.guerrillamail.com/ajax.php"
+TEMPMAIL_LOL_BASE_URL = "https://api.tempmail.lol"
+DROPMAIL_BASE_URL = "https://dropmail.me/api"
+
+# Available services
+AVAILABLE_SERVICES = {
+    "mailtm": {"name": "Mail.tm", "base_url": MAILTM_BASE_URL},
+    "mailgw": {"name": "Mail.gw", "base_url": MAILGW_BASE_URL},
+    "1secmail": {"name": "1secmail", "base_url": ONESECMAIL_BASE_URL},
+    "guerrilla": {"name": "Guerrilla Mail", "base_url": GUERRILLA_BASE_URL},
+    "tempmail_lol": {"name": "TempMail.lol", "base_url": TEMPMAIL_LOL_BASE_URL},
+    "dropmail": {"name": "DropMail", "base_url": DROPMAIL_BASE_URL}
+}
 
 
 # Pydantic Models
