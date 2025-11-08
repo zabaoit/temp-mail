@@ -180,9 +180,13 @@ function App() {
       }
       
       const updateTimer = async () => {
-        const now = new Date();
-        const expiresAt = new Date(currentEmail.expires_at);
+        // CRITICAL FIX: Use UTC for both to avoid timezone mismatch
+        const now = new Date();  // Local time
+        const expiresAt = new Date(currentEmail.expires_at);  // Will parse with timezone
         const diffSeconds = Math.floor((expiresAt - now) / 1000);
+        
+        // Debug logging
+        console.log(`⏱️  Timer Update - Now: ${now.toISOString()}, Expires: ${expiresAt.toISOString()}, Diff: ${diffSeconds}s`);
         
         if (diffSeconds <= 0) {
           setTimeLeft(0);
