@@ -15,10 +15,21 @@ const TempMail = () => {
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [timeLeft, setTimeLeft] = useState(600); // 10 minutes in seconds
 
-  // Fetch available domains on mount
+  // Fetch available domains and auto-create email on mount
   useEffect(() => {
-    fetchDomains();
-    loadEmailHistory();
+    const initializeApp = async () => {
+      await fetchDomains();
+      loadEmailHistory();
+      
+      // Auto-create email if no current email
+      setTimeout(() => {
+        if (!currentEmail) {
+          createEmail();
+        }
+      }, 1000);
+    };
+    
+    initializeApp();
   }, []);
 
   // Timer countdown
