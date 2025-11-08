@@ -605,16 +605,19 @@ async def create_email_with_failover(username: Optional[str] = None, preferred_s
     password = ''.join(random.choices(string.ascii_letters + string.digits, k=16))
     
     # Define provider priority based on preferred_service
+    # NOTE: 1secmail disabled due to API authentication requirement (2025-01-08)
     if preferred_service == "mailtm":
         providers_to_try = ["mailtm"]
     elif preferred_service == "1secmail":
-        providers_to_try = ["1secmail"]
+        # 1secmail is no longer available - fallback to auto
+        logging.warning("⚠️ 1secmail is disabled (requires API key). Falling back to auto mode.")
+        providers_to_try = ["mailtm", "mailgw", "guerrilla"]
     elif preferred_service == "mailgw":
         providers_to_try = ["mailgw"]
     elif preferred_service == "guerrilla":
         providers_to_try = ["guerrilla"]
     else:  # auto
-        providers_to_try = ["mailtm", "mailgw", "1secmail", "guerrilla"]
+        providers_to_try = ["mailtm", "mailgw", "guerrilla"]  # Removed 1secmail
     
     errors = []
     
