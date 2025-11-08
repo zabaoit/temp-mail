@@ -32,6 +32,15 @@ api_router = APIRouter(prefix="/api")
 
 # Email Provider Configuration
 MAILTM_BASE_URL = "https://api.mail.tm"
+MAILGW_BASE_URL = "https://api.mail.gw"
+ONESECMAIL_BASE_URL = "https://www.1secmail.com/api/v1"
+
+# Available services
+AVAILABLE_SERVICES = {
+    "mailtm": {"name": "Mail.tm", "base_url": MAILTM_BASE_URL},
+    "mailgw": {"name": "Mail.gw", "base_url": MAILGW_BASE_URL},
+    "1secmail": {"name": "1secmail", "base_url": ONESECMAIL_BASE_URL}
+}
 
 # Rate limiting tracking (in-memory)
 # In production, use Redis or database
@@ -41,16 +50,18 @@ _rate_limit_tracker = {
     "reset_time": 0
 }
 
-# Domain cache to reduce API calls
+# Domain cache to reduce API calls (per service)
 _domain_cache = {
-    "domain": None,
-    "cached_at": 0,
-    "ttl": 300  # Cache for 5 minutes
+    "mailtm": {"domains": [], "cached_at": 0, "ttl": 300},
+    "mailgw": {"domains": [], "cached_at": 0, "ttl": 300},
+    "1secmail": {"domains": [], "cached_at": 0, "ttl": 300}
 }
 
 # Provider tracking
 _provider_stats = {
-    "mailtm": {"success": 0, "failures": 0, "last_failure": 0}
+    "mailtm": {"success": 0, "failures": 0, "last_failure": 0},
+    "mailgw": {"success": 0, "failures": 0, "last_failure": 0},
+    "1secmail": {"success": 0, "failures": 0, "last_failure": 0}
 }
 
 
