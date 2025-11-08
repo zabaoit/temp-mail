@@ -142,14 +142,27 @@ const TempMail = () => {
     alert('Đã copy vào clipboard!');
   };
 
-  // Group domains by service
-  const groupedDomains = domains.reduce((acc, domain) => {
-    if (!acc[domain.service]) {
-      acc[domain.service] = [];
+  const refreshTimer = () => {
+    setTimeLeft(600); // Reset to 10 minutes
+  };
+
+  const changeEmail = () => {
+    createEmail();
+  };
+
+  const deleteEmail = () => {
+    if (window.confirm('Bạn có chắc muốn xóa email này?')) {
+      setCurrentEmail(null);
+      setMessages([]);
+      setTimeLeft(600);
     }
-    acc[domain.service].push(domain);
-    return acc;
-  }, {});
+  };
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
