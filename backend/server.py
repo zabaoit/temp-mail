@@ -243,111 +243,115 @@ async def get_mailtm_message_detail(token: str, message_id: str):
 
 
 # ============================================
-# 1secmail Provider Functions
+# 1secmail Provider Functions - DISABLED (Requires API Key)
 # ============================================
+# NOTE: 1secmail API changed to require authentication as of 2024-2025
+# All requests now return 403 Forbidden without API key
+# Keeping code commented for future re-enablement if API key is obtained
+# Date disabled: 2025-01-08
 
-async def get_1secmail_domains():
-    """Get available domains from 1secmail with caching and fallback"""
-    now = datetime.now(timezone.utc).timestamp()
-    cache = _domain_cache["1secmail"]
-    
-    # Check cache first
-    if cache["domains"] and now < cache["expires_at"]:
-        logging.info(f"✅ Using cached 1secmail domains (TTL: {int(cache['expires_at'] - now)}s)")
-        return cache["domains"]
-    
-    # Static fallback domains (always work)
-    FALLBACK_DOMAINS = [
-        "1secmail.com", "1secmail.org", "1secmail.net",
-        "wwjmp.com", "esiix.com", "xojxe.com", "yoggm.com"
-    ]
-    
-    # Try API with retries
-    for attempt in range(RETRY_MAX_ATTEMPTS):
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            try:
-                # Enhanced headers to bypass 403
-                enhanced_headers = {
-                    **BROWSER_HEADERS,
-                    "Cache-Control": "no-cache",
-                    "Pragma": "no-cache",
-                    "Sec-Fetch-Dest": "empty",
-                    "Sec-Fetch-Mode": "cors",
-                    "Sec-Fetch-Site": "cross-site"
-                }
-                
-                response = await client.get(
-                    f"{ONESECMAIL_BASE_URL}/?action=getDomainList",
-                    headers=enhanced_headers,
-                    follow_redirects=True
-                )
-                response.raise_for_status()
-                domains = response.json()
-                
-                if isinstance(domains, list) and domains:
-                    cache["domains"] = domains
-                    cache["expires_at"] = now + DOMAIN_CACHE_TTL
-                    logging.info(f"✅ Cached {len(domains)} 1secmail domains from API")
-                    return domains
-            except Exception as e:
-                logging.error(f"❌ 1secmail API error (attempt {attempt + 1}): {e}")
-                if attempt < RETRY_MAX_ATTEMPTS - 1:
-                    await asyncio.sleep(RETRY_BASE_DELAY * (2 ** attempt))
-    
-    # Use cached domains if available
-    if cache["domains"]:
-        logging.warning("⚠️ Using expired cache due to API errors")
-        return cache["domains"]
-    
-    # Final fallback: use static domains
-    logging.warning(f"⚠️ 1secmail API unavailable, using {len(FALLBACK_DOMAINS)} fallback domains")
-    cache["domains"] = FALLBACK_DOMAINS
-    cache["expires_at"] = now + DOMAIN_CACHE_TTL
-    return FALLBACK_DOMAINS
-
-
-async def create_1secmail_account(username: str, domain: str):
-    """Create 1secmail account"""
-    address = f"{username}@{domain}"
-    return {
-        "address": address,
-        "password": "no-password",
-        "token": address,
-        "account_id": address
-    }
+# async def get_1secmail_domains():
+#     """Get available domains from 1secmail with caching and fallback"""
+#     now = datetime.now(timezone.utc).timestamp()
+#     cache = _domain_cache["1secmail"]
+#     
+#     # Check cache first
+#     if cache["domains"] and now < cache["expires_at"]:
+#         logging.info(f"✅ Using cached 1secmail domains (TTL: {int(cache['expires_at'] - now)}s)")
+#         return cache["domains"]
+#     
+#     # Static fallback domains (always work)
+#     FALLBACK_DOMAINS = [
+#         "1secmail.com", "1secmail.org", "1secmail.net",
+#         "wwjmp.com", "esiix.com", "xojxe.com", "yoggm.com"
+#     ]
+#     
+#     # Try API with retries
+#     for attempt in range(RETRY_MAX_ATTEMPTS):
+#         async with httpx.AsyncClient(timeout=10.0) as client:
+#             try:
+#                 # Enhanced headers to bypass 403
+#                 enhanced_headers = {
+#                     **BROWSER_HEADERS,
+#                     "Cache-Control": "no-cache",
+#                     "Pragma": "no-cache",
+#                     "Sec-Fetch-Dest": "empty",
+#                     "Sec-Fetch-Mode": "cors",
+#                     "Sec-Fetch-Site": "cross-site"
+#                 }
+#                 
+#                 response = await client.get(
+#                     f"{ONESECMAIL_BASE_URL}/?action=getDomainList",
+#                     headers=enhanced_headers,
+#                     follow_redirects=True
+#                 )
+#                 response.raise_for_status()
+#                 domains = response.json()
+#                 
+#                 if isinstance(domains, list) and domains:
+#                     cache["domains"] = domains
+#                     cache["expires_at"] = now + DOMAIN_CACHE_TTL
+#                     logging.info(f"✅ Cached {len(domains)} 1secmail domains from API")
+#                     return domains
+#             except Exception as e:
+#                 logging.error(f"❌ 1secmail API error (attempt {attempt + 1}): {e}")
+#                 if attempt < RETRY_MAX_ATTEMPTS - 1:
+#                     await asyncio.sleep(RETRY_BASE_DELAY * (2 ** attempt))
+#     
+#     # Use cached domains if available
+#     if cache["domains"]:
+#         logging.warning("⚠️ Using expired cache due to API errors")
+#         return cache["domains"]
+#     
+#     # Final fallback: use static domains
+#     logging.warning(f"⚠️ 1secmail API unavailable, using {len(FALLBACK_DOMAINS)} fallback domains")
+#     cache["domains"] = FALLBACK_DOMAINS
+#     cache["expires_at"] = now + DOMAIN_CACHE_TTL
+#     return FALLBACK_DOMAINS
 
 
-async def get_1secmail_messages(username: str, domain: str):
-    """Get messages from 1secmail"""
-    async with httpx.AsyncClient(timeout=10.0) as client:
-        try:
-            response = await client.get(
-                f"{ONESECMAIL_BASE_URL}/?action=getMessages&login={username}&domain={domain}",
-                headers=BROWSER_HEADERS
-            )
-            response.raise_for_status()
-            messages = response.json()
-            
-            # Transform to standard format
-            transformed = []
-            for msg in messages:
-                transformed.append({
-                    "id": str(msg["id"]),
-                    "from": {
-                        "address": msg.get("from", "unknown"),
-                        "name": msg.get("from", "unknown")
-                    },
-                    "subject": msg.get("subject", "No Subject"),
-                    "createdAt": msg.get("date", datetime.now(timezone.utc).isoformat())
-                })
-            return transformed
-        except Exception as e:
-            logging.error(f"Error getting 1secmail messages: {e}")
-            return []
+# async def create_1secmail_account(username: str, domain: str):
+#     """Create 1secmail account"""
+#     address = f"{username}@{domain}"
+#     return {
+#         "address": address,
+#         "password": "no-password",
+#         "token": address,
+#         "account_id": address
+#     }
 
 
-async def get_1secmail_message_detail(username: str, domain: str, message_id: str):
-    """Get message detail from 1secmail"""
+# async def get_1secmail_messages(username: str, domain: str):
+#     """Get messages from 1secmail"""
+#     async with httpx.AsyncClient(timeout=10.0) as client:
+#         try:
+#             response = await client.get(
+#                 f"{ONESECMAIL_BASE_URL}/?action=getMessages&login={username}&domain={domain}",
+#                 headers=BROWSER_HEADERS
+#             )
+#             response.raise_for_status()
+#             messages = response.json()
+#             
+#             # Transform to standard format
+#             transformed = []
+#             for msg in messages:
+#                 transformed.append({
+#                     "id": str(msg["id"]),
+#                     "from": {
+#                         "address": msg.get("from", "unknown"),
+#                         "name": msg.get("from", "unknown")
+#                     },
+#                     "subject": msg.get("subject", "No Subject"),
+#                     "createdAt": msg.get("date", datetime.now(timezone.utc).isoformat())
+#                 })
+#             return transformed
+#         except Exception as e:
+#             logging.error(f"Error getting 1secmail messages: {e}")
+#             return []
+
+
+# async def get_1secmail_message_detail(username: str, domain: str, message_id: str):
+#     """Get message detail from 1secmail"""
     async with httpx.AsyncClient(timeout=10.0) as client:
         try:
             response = await client.get(
