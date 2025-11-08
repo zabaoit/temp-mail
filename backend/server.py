@@ -505,10 +505,35 @@ async def create_email_with_failover(username: Optional[str] = None, preferred_s
 
 @api_router.get("/")
 async def root():
+    """API root with provider status"""
+    now = datetime.now(timezone.utc).timestamp()
+    
+    # Add human-readable status
+    for provider in _provider_stats:
+        stats = _provider_stats[provider]
+        cooldown_until = stats.get("cooldown_until", 0)
+        
+        if now < cooldown_until:
+            stats["status"] = f"cooldown ({int(cooldown_until - now)}s remaining)"
+        else:
+            stats["status"] = "active"
+            
+        # Success rate
+        total = stats["success"] + stats["failures"]
+        if total > 0:
+            stats["success_rate"] = f"{(stats['success'] / total * 100):.1f}%"
+        else:
+            stats["success_rate"] = "N/A"
+    
     return {
         "message": "TempMail API - MySQL with Multiple Providers",
         "providers": ["Mail.tm", "1secmail"],
-        "stats": _provider_stats
+        "stats": _provider_stats,
+        "config": {
+            "mailtm_cooldown": f"{MAILTM_COOLDOWN_SECONDS}s",
+            "retry_attempts": RETRY_MAX_ATTEMPTS,
+            "domain_cache_ttl": f"{DOMAIN_CACHE_TTL}s"
+        }
     }
 
 
