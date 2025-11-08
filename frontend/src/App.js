@@ -556,6 +556,19 @@ function App() {
     }
   };
 
+  const selectHistoryMessage = async (message) => {
+    if (!selectedHistoryEmail) return;
+    
+    try {
+      const response = await axios.get(
+        `${API}/emails/history/${selectedHistoryEmail.id}/messages/${message.id}`
+      );
+      setSelectedMessage(response.data);
+    } catch (error) {
+      toast.error('Không thể tải chi tiết tin nhắn');
+    }
+  };
+
   const toggleSavedSelection = (savedId) => {
     setSelectedSavedIds(prev => {
       if (prev.includes(savedId)) {
