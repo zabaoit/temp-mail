@@ -222,19 +222,21 @@ async def root():
 async def create_email(request: CreateEmailRequest, db: Session = Depends(get_db)):
     """Create a new temporary email with rate limiting"""
     try:
-        # Check local rate limit (max 3 emails per minute)
+        # Check local rate limit (max 10 emails per minute for development)
+        # TODO: Lower this to 3 for production
         current_time = time.time()
+        MAX_EMAILS_PER_MINUTE = 10  # Increase for development/testing
         
         if current_time - _rate_limit_tracker["reset_time"] > 60:
             # Reset counter after 1 minute
             _rate_limit_tracker["create_count"] = 0
             _rate_limit_tracker["reset_time"] = current_time
         
-        if _rate_limit_tracker["create_count"] >= 3:
+        if _rate_limit_tracker["create_count"] >= MAX_EMAILS_PER_MINUTE:
             wait_seconds = int(60 - (current_time - _rate_limit_tracker["reset_time"]))
             raise HTTPException(
                 status_code=429,
-                detail=f"Rate limit: Maximum 3 emails per minute. Please wait {wait_seconds} seconds."
+                detail=f"Rate limit: Maximum {MAX_EMAILS_PER_MINUTE} emails per minute. Please wait {wait_seconds} seconds."
             )
         
         # Increment counter
