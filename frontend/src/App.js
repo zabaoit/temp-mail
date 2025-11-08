@@ -1205,82 +1205,199 @@ function App() {
 
             {/* History Tab */}
             <TabsContent value="history" className="tab-content-new">
-              <div className="history-section">
-                <div className="history-header">
-                  <h2 className="history-title">Lịch sử email</h2>
-                  {historyEmails.length > 0 && (
-                    <div className="history-actions">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={toggleSelectAll}
-                        className="select-all-btn"
-                      >
-                        {selectedHistoryIds.length === historyEmails.length ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={deleteSelectedHistory}
-                        disabled={selectedHistoryIds.length === 0 || loading}
-                        className="delete-selected-btn"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Xóa đã chọn ({selectedHistoryIds.length})
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={deleteAllHistory}
-                        disabled={loading}
-                        className="delete-all-btn"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Xóa tất cả
-                      </Button>
+              {viewMode === 'list' || activeTab !== 'history' ? (
+                <div className="history-section">
+                  <div className="history-header">
+                    <h2 className="history-title">Lịch sử email</h2>
+                    {historyEmails.length > 0 && (
+                      <div className="history-actions">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={toggleSelectAll}
+                          className="select-all-btn"
+                        >
+                          {selectedHistoryIds.length === historyEmails.length ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={deleteSelectedHistory}
+                          disabled={selectedHistoryIds.length === 0 || loading}
+                          className="delete-selected-btn"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Xóa đã chọn ({selectedHistoryIds.length})
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={deleteAllHistory}
+                          disabled={loading}
+                          className="delete-all-btn"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Xóa tất cả
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+
+                  {historyEmails.length === 0 ? (
+                    <div className="empty-state">
+                      <History className="empty-icon" />
+                      <h4 className="empty-title">Chưa có lịch sử</h4>
+                      <p className="empty-description">Các email đã hết hạn sẽ được lưu tại đây</p>
+                    </div>
+                  ) : (
+                    <ScrollArea className="history-list">
+                      {historyEmails.map((email) => (
+                        <Card 
+                          key={email.id} 
+                          className={`history-card ${selectedHistoryIds.includes(email.id) ? 'selected' : ''}`}
+                        >
+                          <CardContent className="history-card-content">
+                            <input
+                              type="checkbox"
+                              checked={selectedHistoryIds.includes(email.id)}
+                              onChange={() => toggleHistorySelection(email.id)}
+                              className="history-checkbox"
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                            <div 
+                              className="history-info"
+                              onClick={() => viewHistoryEmail(email)}
+                            >
+                              <Mail className="h-5 w-5 history-icon" />
+                              <div className="history-details">
+                                <p className="history-address">{email.address}</p>
+                                <span className="history-time">
+                                  Hết hạn: {getTimeAgo(email.expired_at)}
+                                </span>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </ScrollArea>
+                  )}
+                </div>
+              ) : (
+                <div className="messages-section">
+                  <div className="messages-header">
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        setViewMode('list');
+                        setHistoryMessages([]);
+                        setSelectedHistoryEmail(null);
+                        setSelectedMessage(null);
+                      }}
+                      className="back-btn"
+                    >
+                      ← Quay lại danh sách
+                    </Button>
+                    <h3 className="messages-title">
+                      Tin nhắn: {selectedHistoryEmail?.address}
+                    </h3>
+                  </div>
+
+                  {!selectedMessage ? (
+                    <div className="inbox-area">
+                      {historyMessages.length === 0 ? (
+                        <div className="empty-state">
+                          <Mail className="empty-icon" />
+                          <h4 className="empty-title">Không có tin nhắn</h4>
+                          <p className="empty-description">Email này không có tin nhắn nào</p>
+                        </div>
+                      ) : (
+                        <ScrollArea className="messages-list">
+                          {historyMessages.map((msg) => (
+                            <Card
+                              key={msg.id}
+                              className="message-card"
+                              onClick={() => selectHistoryMessage(msg)}
+                            >
+                              <CardContent className="message-card-content">
+                                <div className="message-info">
+                                  <h4 className="message-from">{msg.from?.name || msg.from?.address}</h4>
+                                  <p className="message-subject">{msg.subject}</p>
+                                  <span className="message-time">{getTimeAgo(msg.createdAt)}</span>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </ScrollArea>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="message-detail">
+                      <div className="message-detail-header">
+                        <Button
+                          variant="ghost"
+                          onClick={() => setSelectedMessage(null)}
+                          className="back-btn"
+                        >
+                          ← Quay lại danh sách tin nhắn
+                        </Button>
+                      </div>
+                      
+                      <Card className="detail-card">
+                        <CardContent className="detail-content">
+                          <div className="detail-header">
+                            <h3 className="detail-subject">{selectedMessage.subject}</h3>
+                            <div className="detail-meta">
+                              <div className="meta-row">
+                                <span className="meta-label">Từ:</span>
+                                <span className="meta-value">
+                                  {selectedMessage.from?.name} ({selectedMessage.from?.address})
+                                </span>
+                              </div>
+                              <div className="meta-row">
+                                <span className="meta-label">Ngày:</span>
+                                <span className="meta-value">
+                                  {new Date(selectedMessage.createdAt).toLocaleString('vi-VN')}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <Separator className="detail-separator" />
+
+                          <Tabs defaultValue="html" className="message-tabs">
+                            <TabsList>
+                              <TabsTrigger value="html">HTML</TabsTrigger>
+                              <TabsTrigger value="text">Text</TabsTrigger>
+                            </TabsList>
+                            <TabsContent value="html" className="message-content">
+                              {selectedMessage.html && Array.isArray(selectedMessage.html) && 
+                               selectedMessage.html.length > 0 && selectedMessage.html[0] ? (
+                                <div className="html-content" dangerouslySetInnerHTML={{ __html: selectedMessage.html[0] }} />
+                              ) : selectedMessage.html && typeof selectedMessage.html === 'string' && 
+                                 selectedMessage.html.trim() ? (
+                                <div className="html-content" dangerouslySetInnerHTML={{ __html: selectedMessage.html }} />
+                              ) : (
+                                <p className="no-content">Không có nội dung HTML</p>
+                              )}
+                            </TabsContent>
+                            <TabsContent value="text" className="message-content">
+                              {selectedMessage.text && Array.isArray(selectedMessage.text) && 
+                               selectedMessage.text.length > 0 && selectedMessage.text[0] ? (
+                                <pre className="text-content">{selectedMessage.text[0]}</pre>
+                              ) : selectedMessage.text && typeof selectedMessage.text === 'string' && 
+                                 selectedMessage.text.trim() ? (
+                                <pre className="text-content">{selectedMessage.text}</pre>
+                              ) : (
+                                <p className="no-content">Không có nội dung văn bản</p>
+                              )}
+                            </TabsContent>
+                          </Tabs>
+                        </CardContent>
+                      </Card>
                     </div>
                   )}
                 </div>
-
-                {historyEmails.length === 0 ? (
-                  <div className="empty-state">
-                    <History className="empty-icon" />
-                    <h4 className="empty-title">Chưa có lịch sử</h4>
-                    <p className="empty-description">Các email đã hết hạn sẽ được lưu tại đây</p>
-                  </div>
-                ) : (
-                  <ScrollArea className="history-list">
-                    {historyEmails.map((email) => (
-                      <Card 
-                        key={email.id} 
-                        className={`history-card ${selectedHistoryIds.includes(email.id) ? 'selected' : ''}`}
-                      >
-                        <CardContent className="history-card-content">
-                          <input
-                            type="checkbox"
-                            checked={selectedHistoryIds.includes(email.id)}
-                            onChange={() => toggleHistorySelection(email.id)}
-                            className="history-checkbox"
-                            onClick={(e) => e.stopPropagation()}
-                          />
-                          <div 
-                            className="history-info"
-                            onClick={() => viewHistoryEmail(email)}
-                          >
-                            <Mail className="h-5 w-5 history-icon" />
-                            <div className="history-details">
-                              <p className="history-address">{email.address}</p>
-                              <span className="history-time">
-                                Hết hạn: {getTimeAgo(email.expired_at)}
-                              </span>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </ScrollArea>
-                )}
-              </div>
+              )}
             </TabsContent>
           </Tabs>
         </main>
