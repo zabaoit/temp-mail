@@ -227,16 +227,59 @@ async def get_mailtm_message_detail(token: str, message_id: str):
 # ============================================
 
 async def get_1secmail_domains():
-    """Get available domains from 1secmail"""
-    async with httpx.AsyncClient(timeout=10.0) as client:
-        try:
-            response = await client.get(f"{ONESECMAIL_BASE_URL}/?action=getDomainList")
-            response.raise_for_status()
-            domains = response.json()
-            return domains if isinstance(domains, list) else []
-        except Exception as e:
-            logging.error(f"❌ 1secmail domains error: {e}")
-            return []
+    """Get available domains from 1secmail with caching and proper headers"""
+    # Check cache first
+    now = datetime.now(timezone.utc).timestamp()
+    cache = _domain_cache["1secmail"]
+    
+    if cache["domains"] and now < cache["expires_at"]:
+        logging.info(f"✅ Using cached 1secmail domains (TTL: {int(cache['expires_at'] - now)}s)")
+        return cache["domains"]
+    
+    # Retry logic with exponential backoff
+    for attempt in range(RETRY_MAX_ATTEMPTS):
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            try:
+                # Add browser headers to bypass 403
+                response = await client.get(
+                    f"{ONESECMAIL_BASE_URL}/?action=getDomainList",
+                    headers=BROWSER_HEADERS
+                )
+                response.raise_for_status()
+                domains = response.json()
+                
+                if isinstance(domains, list) and domains:
+                    # Update cache
+                    cache["domains"] = domains
+                    cache["expires_at"] = now + DOMAIN_CACHE_TTL
+                    logging.info(f"✅ Cached {len(domains)} 1secmail domains")
+                    return domains
+                    
+                return []
+                
+            except httpx.HTTPStatusError as e:
+                if e.response.status_code == 403:
+                    logging.warning(f"⚠️ 1secmail 403 Forbidden (attempt {attempt + 1}/{RETRY_MAX_ATTEMPTS})")
+                    if attempt < RETRY_MAX_ATTEMPTS - 1:
+                        delay = RETRY_BASE_DELAY * (2 ** attempt)
+                        logging.info(f"⏳ Retrying in {delay}s...")
+                        await asyncio.sleep(delay)
+                        continue
+                logging.error(f"❌ 1secmail HTTP error: {e.response.status_code}")
+            except Exception as e:
+                logging.error(f"❌ 1secmail domains error: {e}")
+                
+            # If this is not the last attempt, retry
+            if attempt < RETRY_MAX_ATTEMPTS - 1:
+                delay = RETRY_BASE_DELAY * (2 ** attempt)
+                await asyncio.sleep(delay)
+    
+    # Return cached domains if available, even if expired
+    if cache["domains"]:
+        logging.warning("⚠️ Using expired cache due to API errors")
+        return cache["domains"]
+    
+    return []
 
 
 async def create_1secmail_account(username: str, domain: str):
