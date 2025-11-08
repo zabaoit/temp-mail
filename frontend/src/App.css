@@ -237,25 +237,25 @@ body {
   background-color: var(--color-bg-primary);
   border: 1px solid var(--color-border-light);
   border-radius: var(--radius-lg);
-  padding: var(--spacing-2xl);
+  padding: var(--spacing-lg); /* Reduced from 2xl */
   text-align: center;
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: var(--spacing-lg); /* Reduced from xl */
 }
 
 .hero-title {
-  font-size: 1.875rem;
+  font-size: 1.5rem; /* Reduced from 1.875rem */
   font-weight: 700;
   color: var(--color-text-primary);
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-sm); /* Reduced from md */
   letter-spacing: -0.02em;
 }
 
 .hero-description {
-  font-size: 1rem;
+  font-size: 0.9rem; /* Reduced from 1rem */
   color: var(--color-text-secondary);
   max-width: 600px;
-  margin: 0 auto var(--spacing-xl);
-  line-height: 1.6;
+  margin: 0 auto var(--spacing-md); /* Reduced from xl */
+  line-height: 1.5;
 }
 
 /* ===================================
@@ -266,8 +266,8 @@ body {
   background-color: var(--color-bg-tertiary);
   border: 2px solid var(--color-accent-200);
   border-radius: var(--radius-md);
-  padding: var(--spacing-md);
-  margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-sm); /* Reduced from md */
+  margin-bottom: var(--spacing-md); /* Reduced from lg */
   box-shadow: var(--shadow-sm);
 }
 
@@ -280,7 +280,7 @@ body {
 }
 
 .email-address {
-  font-size: 1.1rem;
+  font-size: 1rem; /* Reduced from 1.1rem */
   font-weight: 600;
   color: var(--color-text-primary);
   font-family: 'Courier New', monospace;
@@ -289,15 +289,15 @@ body {
 .email-actions-inline {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm); /* Reduced from md */
 }
 
 .timer {
-  font-size: 1.125rem;
+  font-size: 1rem; /* Reduced from 1.125rem */
   font-weight: 700;
   color: var(--color-accent);
   font-family: 'Courier New', monospace;
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: var(--spacing-xs) var(--spacing-sm); /* Reduced padding */
   background-color: var(--color-accent-light);
   border-radius: var(--radius-sm);
 }
