@@ -801,7 +801,44 @@ body {
 
 .html-content * {
   max-width: 100%;
-  color: inherit;
+}
+
+/* Dark theme specific improvements for HTML content */
+:root.dark .html-content {
+  color: #e5e7eb;
+}
+
+:root.dark .html-content * {
+  color: inherit !important;
+}
+
+:root.dark .html-content h1,
+:root.dark .html-content h2,
+:root.dark .html-content h3,
+:root.dark .html-content h4,
+:root.dark .html-content h5,
+:root.dark .html-content h6 {
+  color: #f9fafb !important;
+}
+
+:root.dark .html-content strong,
+:root.dark .html-content b {
+  color: #f9fafb !important;
+  font-weight: 600;
+}
+
+:root.dark .html-content a {
+  color: #06b6d4 !important;
+}
+
+:root.dark .html-content table {
+  border-color: #374151;
+}
+
+:root.dark .html-content td,
+:root.dark .html-content th {
+  border-color: #374151 !important;
+  color: #e5e7eb !important;
 }
 
 .html-content p {
