@@ -93,19 +93,45 @@ class DeleteHistoryRequest(BaseModel):
 
 # Mail.tm Service Functions
 async def get_available_domains():
-    """Get available domains from Mail.tm"""
+    """Get available domains from Mail.tm with caching"""
+    current_time = time.time()
+    
+    # Check cache first
+    if (_domain_cache["domain"] and 
+        current_time - _domain_cache["cached_at"] < _domain_cache["ttl"]):
+        logging.info(f"Using cached domain: {_domain_cache['domain']}")
+        return _domain_cache["domain"]
+    
+    # Fetch from API with retry
     async with httpx.AsyncClient(timeout=10.0) as http_client:
-        try:
-            response = await http_client.get(f"{MAILTM_BASE_URL}/domains")
-            response.raise_for_status()
-            data = response.json()
-            domains = data.get("hydra:member", [])
-            if domains:
-                return domains[0]["domain"]
-            return None
-        except Exception as e:
-            logging.error(f"Error getting domains: {e}")
-            return None
+        for attempt in range(3):
+            try:
+                response = await http_client.get(f"{MAILTM_BASE_URL}/domains")
+                response.raise_for_status()
+                data = response.json()
+                domains = data.get("hydra:member", [])
+                if domains:
+                    domain = domains[0]["domain"]
+                    # Update cache
+                    _domain_cache["domain"] = domain
+                    _domain_cache["cached_at"] = current_time
+                    logging.info(f"Cached new domain: {domain}")
+                    return domain
+                return None
+            except httpx.HTTPStatusError as e:
+                if e.response.status_code == 429:
+                    wait_time = 2 ** attempt  # Exponential backoff: 1s, 2s, 4s
+                    logging.warning(f"Rate limited on domains, waiting {wait_time}s (attempt {attempt + 1}/3)")
+                    await asyncio.sleep(wait_time)
+                else:
+                    logging.error(f"Error getting domains: {e}")
+                    return None
+            except Exception as e:
+                logging.error(f"Error getting domains: {e}")
+                return None
+        
+        # All retries failed
+        return None
 
 
 async def create_mailtm_account(address: str, password: str):
