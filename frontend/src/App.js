@@ -411,6 +411,38 @@ function App() {
     }
   };
 
+  const saveCurrentEmail = async () => {
+    if (!currentEmail) {
+      toast.error('Không có email để lưu');
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      // Check if already saved
+      const alreadySaved = savedEmails.some(email => email.id === currentEmail.id);
+      if (alreadySaved) {
+        toast.warning('Email này đã được lưu rồi!');
+        setLoading(false);
+        return;
+      }
+      
+      // Call backend API to save email
+      const response = await axios.post(`${API}/emails/${currentEmail.id}/save`);
+      
+      // Update local state
+      setSavedEmails(prev => [response.data, ...prev]);
+      
+      toast.success('✅ Đã lưu email thành công!');
+    } catch (error) {
+      toast.error('Không thể lưu email', {
+        description: error.response?.data?.detail || 'Lỗi không xác định'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const refreshMessages = async (emailId, showToast = true) => {
     if (!emailId) {
       console.warn('Invalid email ID');
