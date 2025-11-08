@@ -1328,6 +1328,12 @@ async def get_email_messages(email_id: int, db: Session = Depends(get_db)):
         messages = await get_mailgw_messages(email.token)
     elif email.provider == "1secmail":
         messages = await get_1secmail_messages(email.username, email.domain)
+    elif email.provider == "guerrilla":
+        messages = await get_guerrilla_messages(email.token)
+    elif email.provider == "tempmail_lol":
+        messages = await get_tempmail_lol_messages(email.address)
+    elif email.provider == "dropmail":
+        messages = await get_dropmail_messages(email.token)
     else:
         messages = []
     
