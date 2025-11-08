@@ -302,7 +302,7 @@ function App() {
   };
 
   const refreshMessages = async (emailId, showToast = true) => {
-    if (!emailId || emailId.trim() === '') {
+    if (!emailId) {
       console.warn('Invalid email ID');
       return;
     }
