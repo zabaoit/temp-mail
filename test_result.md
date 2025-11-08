@@ -1427,3 +1427,112 @@ agent_communication:
       
       Status: ✅ Ready for testing
 
+  - agent: "main"
+    message: |
+      ✅ SỬA LỖI 403 FORBIDDEN - VÔ HIỆU HÓA 1SECMAIL (2025-01-08)
+      
+      Vấn đề từ user:
+      - 🔴 1secmail API trả về 403 Forbidden cho tất cả requests
+      - 🔴 Lỗi lặp đi lặp lại mỗi 30 giây trong backend logs
+      - ❌ Không thể fetch domains hoặc tạo email
+      
+      Nguyên nhân (từ troubleshoot agent):
+      - 1secmail API đã thay đổi từ free access sang yêu cầu API key authentication
+      - Tất cả unauthenticated requests bị chặn với 403 Forbidden
+      - Thay đổi này được áp dụng từ 2024-2025
+      
+      === GIẢI PHÁP ÁP DỤNG ===
+      
+      1. ✅ Vô hiệu hóa 1secmail provider:
+         - Comment out tất cả 1secmail functions trong server.py (lines 245-377)
+         - Giữ code để dễ dàng re-enable nếu có API key trong tương lai
+         - Thêm comment giải thích lý do và ngày vô hiệu hóa
+      
+      2. ✅ Loại bỏ khỏi provider rotation:
+         - Xóa "1secmail" khỏi providers_to_try list
+         - Auto mode: ["mailtm", "mailgw", "guerrilla"] (không còn 1secmail)
+         - Nếu user chọn "1secmail": tự động fallback sang "auto" mode
+         - Warning log: "⚠️ 1secmail is disabled (requires API key)"
+      
+      3. ✅ Xử lý graceful cho 1secmail emails hiện có:
+         - GET /api/emails/{id}/messages: Trả về empty array []
+         - GET /api/emails/{id}/messages/{msg_id}: Trả về None
+         - POST /api/emails/{id}/refresh: Trả về empty array []
+         - Tất cả có warning logs để tracking
+      
+      4. ✅ Cập nhật /api/domains endpoint:
+         - service=1secmail: Trả về {"domains": [], "status": "disabled", "message": "..."}
+         - service=auto: Bỏ qua 1secmail, thử guerrilla thay thế
+      
+      5. ✅ Frontend changes:
+         - Xóa option "1secmail" khỏi service dropdowns
+         - Comment: "1secmail (Disabled - Requires API Key)"
+         - Users không còn thấy 1secmail trong UI
+      
+      6. ✅ Startup logs cập nhật:
+         - "✅ Active providers: Mail.tm, Mail.gw, Guerrilla Mail, TempMail.lol"
+         - "⚠️ Disabled: 1secmail (requires API key)"
+      
+      === KẾT QUẢ ===
+      
+      Before:
+      ```
+      ❌ 403 Forbidden errors mỗi 30 giây
+      ❌ Multiple retry attempts failing
+      ❌ Backend logs đầy error messages
+      ```
+      
+      After:
+      ```
+      ✅ Không còn 403 errors
+      ✅ Backend khởi động sạch với 3 active providers
+      ✅ App hoạt động bình thường
+      ✅ Email creation work với Mail.tm, Mail.gw, Guerrilla
+      ✅ Existing 1secmail emails không crash app (empty inbox)
+      ```
+      
+      === FILES MODIFIED ===
+      
+      Backend:
+      - /app/backend/server.py:
+        • Lines 245-377: Commented 1secmail functions
+        • Lines 603-615: Removed from provider rotation
+        • Lines 865-938: Graceful handling for existing emails
+        • Lines 1037-1066: Updated domains endpoint
+        • Lines 1072-1074: Updated startup logs
+      
+      Frontend:
+      - /app/frontend/src/App.js:
+        • Lines 610, 814: Removed 1secmail option from dropdowns
+        • Line 519: Kept mapping for backward compatibility
+      
+      Documentation:
+      - /app/FIX_1SECMAIL_403_DISABLED.md: Comprehensive documentation
+      
+      === PROVIDER STATUS ===
+      
+      ✅ Active (3):
+      - Mail.tm (free, no auth)
+      - Mail.gw (free, no auth)  
+      - Guerrilla Mail (free, no auth)
+      - TempMail.lol (free, no auth)
+      
+      ❌ Disabled (1):
+      - 1secmail (requires API key since 2024-2025)
+      
+      === RE-ENABLEMENT ===
+      
+      Nếu có API key trong tương lai:
+      1. Obtain API key từ 1secmail
+      2. Add to .env: ONESECMAIL_API_KEY=...
+      3. Uncomment functions in server.py (lines 245-377)
+      4. Update API calls với Authorization header
+      5. Re-add to provider rotation
+      6. Uncomment frontend options
+      7. Test và restart services
+      
+      Chi tiết: Xem /app/FIX_1SECMAIL_403_DISABLED.md
+      
+      Status: ✅ PRODUCTION READY with 3 active email providers
+      Monitoring: No more 403 errors, clean logs, app stable
+
