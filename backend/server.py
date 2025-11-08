@@ -135,18 +135,35 @@ async def get_available_domains():
 
 
 async def create_mailtm_account(address: str, password: str):
-    """Create account on Mail.tm"""
+    """Create account on Mail.tm with retry logic"""
     async with httpx.AsyncClient(timeout=10.0) as http_client:
-        try:
-            response = await http_client.post(
-                f"{MAILTM_BASE_URL}/accounts",
-                json={"address": address, "password": password}
-            )
-            response.raise_for_status()
-            return response.json()
-        except Exception as e:
-            logging.error(f"Error creating account: {e}")
-            raise HTTPException(status_code=400, detail=str(e))
+        for attempt in range(3):
+            try:
+                response = await http_client.post(
+                    f"{MAILTM_BASE_URL}/accounts",
+                    json={"address": address, "password": password}
+                )
+                response.raise_for_status()
+                return response.json()
+            except httpx.HTTPStatusError as e:
+                if e.response.status_code == 429:
+                    wait_time = 2 ** attempt  # Exponential backoff
+                    logging.warning(f"Rate limited on account creation, waiting {wait_time}s (attempt {attempt + 1}/3)")
+                    
+                    if attempt < 2:  # Don't wait on last attempt
+                        await asyncio.sleep(wait_time)
+                    else:
+                        # Last attempt failed
+                        raise HTTPException(
+                            status_code=429, 
+                            detail="Mail.tm API rate limit exceeded. Please wait a few minutes and try again."
+                        )
+                else:
+                    logging.error(f"Error creating account: {e}")
+                    raise HTTPException(status_code=400, detail=str(e))
+            except Exception as e:
+                logging.error(f"Error creating account: {e}")
+                raise HTTPException(status_code=400, detail=str(e))
 
 
 async def get_mailtm_token(address: str, password: str):
