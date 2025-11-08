@@ -147,6 +147,14 @@ function App() {
         } catch (histErr) {
           console.error('Error loading history:', histErr);
         }
+        
+        // Load saved emails
+        try {
+          const savedResponse = await axios.get(`${API}/emails/saved/list`);
+          setSavedEmails(savedResponse.data);
+        } catch (savedErr) {
+          console.error('Error loading saved emails:', savedErr);
+        }
       } catch (error) {
         console.error('Error initializing app:', error);
         // If error getting emails, try to create one anyway
