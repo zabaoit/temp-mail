@@ -1,8 +1,7 @@
-"""FastAPI server with MySQL and expiry features"""
-from fastapi import FastAPI, APIRouter, HTTPException, Depends
+"""FastAPI server with MongoDB and expiry features"""
+from fastapi import FastAPI, APIRouter, HTTPException
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
 import os
 import logging
 from pathlib import Path
@@ -14,15 +13,17 @@ import random
 import string
 import asyncio
 import time
+import uuid
 
-from database import engine, get_db, Base
-from models import TempEmail as TempEmailModel, EmailHistory as EmailHistoryModel
+from database_mongodb import client
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-# Create database tables
-Base.metadata.create_all(bind=engine)
+# Get database and collections
+db = client.get_database()
+temp_emails_collection = db.temp_emails
+history_collection = db.email_history
 
 # Create the main app
 app = FastAPI()
