@@ -1082,35 +1082,40 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-2xl) * 2;
   text-align: center;
   background-color: var(--color-bg-primary);
-  border: 1px solid var(--color-border-light);
+  border: 1.8px solid var(--color-border-light);
   border-radius: var(--radius-lg);
-}
-
-.empty-icon-large {
-  width: 6rem;
-  height: 6rem;
-  color: var(--color-text-tertiary);
-  margin-bottom: var(--spacing-lg);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+  width: 420px;      /* tăng từ 340 → 420px để không bị xuống dòng */
+  height: 360px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
 }
 
 .empty-title-large {
-  font-size: 1.875rem;
+  font-size: 2rem;
   font-weight: 700;
   color: var(--color-text-primary);
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: 0.75rem;
+  white-space: nowrap;  /* 👈 ngăn chữ bị xuống dòng */
+}
+
+.empty-icon-large {
+  width: 6.5rem;
+  height: 6.5rem;
+  color: var(--color-text-tertiary);
+  margin-bottom: 1.5rem;
 }
 
 .empty-description-large {
-  font-size: 1rem;
+  font-size: 1.05rem;
   color: var(--color-text-secondary);
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: 1.75rem;
 }
 
 .create-btn-large {
-  padding: var(--spacing-md) var(--spacing-xl);
+  padding: 0.7rem 1.8rem;
   background-color: var(--color-accent);
   border: none;
   color: white;
@@ -1120,7 +1125,7 @@ body {
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: 0.5rem;
   transition: all 0.2s ease;
 }
 
