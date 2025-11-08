@@ -1128,26 +1128,29 @@ async def get_domains(service: str = "auto"):
     return {"domains": domains, "service": service}
 
 
+# Create database tables on import
+Base.metadata.create_all(bind=engine)
+
 # Startup event to start background tasks
 @app.on_event("startup")
 async def startup_event():
     """Start background tasks on application startup"""
     # Start background task using asyncio.create_task instead of threading
     asyncio.create_task(background_task_loop())
-    logging.info("✅ Application started with background tasks (MongoDB)")
-    logging.info("✅ Active providers: Mail.tm, 1secmail, Mail.gw, Guerrilla Mail")
+    logging.info("✅ Application started with background tasks (MySQL/SQLAlchemy)")
+    logging.info("✅ Active providers: Mail.tm, Mail.gw, Guerrilla Mail (Random Selection)")
 
 
 async def background_task_loop():
     """Main background task loop"""
-    from background_tasks_mongodb import check_and_move_expired_emails
+    from background_tasks import check_and_move_expired_emails
     CHECK_INTERVAL = 30
     
     logging.info(f"🚀 Background task started - checking every {CHECK_INTERVAL}s")
     
     while True:
         try:
-            await check_and_move_expired_emails()
+            check_and_move_expired_emails()
         except Exception as e:
             logging.error(f"❌ Error in background task loop: {e}")
         
