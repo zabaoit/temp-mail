@@ -442,6 +442,435 @@ async def get_1secmail_message_detail(username: str, domain: str, message_id: st
             return None
 
 
+# ============================================================================
+# Guerrilla Mail Service Functions
+# ============================================================================
+
+async def get_guerrilla_domains():
+    """Get available domains from Guerrilla Mail with caching"""
+    current_time = time.time()
+    service = "guerrilla"
+    
+    # Check cache first
+    if (_domain_cache[service]["domains"] and 
+        current_time - _domain_cache[service]["cached_at"] < _domain_cache[service]["ttl"]):
+        logging.info(f"Using cached Guerrilla Mail domains")
+        return _domain_cache[service]["domains"]
+    
+    # Fetch from API
+    async with httpx.AsyncClient(timeout=10.0) as http_client:
+        try:
+            response = await http_client.get(f"{GUERRILLA_BASE_URL}?f=get_email_address")
+            response.raise_for_status()
+            data = response.json()
+            domains = data.get("email_list", [])
+            
+            # Update cache
+            _domain_cache[service]["domains"] = domains
+            _domain_cache[service]["cached_at"] = current_time
+            logging.info(f"Cached {len(domains)} Guerrilla Mail domains")
+            return domains
+        except Exception as e:
+            logging.error(f"Error getting Guerrilla Mail domains: {e}")
+            return []
+
+
+async def create_guerrilla_account(username: str = None, domain: str = None):
+    """Create/get email on Guerrilla Mail"""
+    async with httpx.AsyncClient(timeout=10.0) as http_client:
+        try:
+            # Get session and email address
+            response = await http_client.get(f"{GUERRILLA_BASE_URL}?f=get_email_address")
+            response.raise_for_status()
+            data = response.json()
+            
+            sid_token = data.get("sid_token")
+            email_addr = data.get("email_addr")
+            
+            # If username provided, set custom username
+            if username and sid_token:
+                set_response = await http_client.get(
+                    f"{GUERRILLA_BASE_URL}?f=set_email_user&email_user={username}&sid_token={sid_token}"
+                )
+                set_response.raise_for_status()
+                set_data = set_response.json()
+                email_addr = set_data.get("email_addr", email_addr)
+            
+            # Extract username and domain
+            parts = email_addr.split("@")
+            return {
+                "address": email_addr,
+                "sid_token": sid_token,
+                "username": parts[0] if len(parts) > 0 else username or "",
+                "domain": parts[1] if len(parts) > 1 else domain or ""
+            }
+        except Exception as e:
+            logging.error(f"Error creating Guerrilla Mail account: {e}")
+            raise
+
+
+async def get_guerrilla_messages(sid_token: str):
+    """Get messages from Guerrilla Mail"""
+    async with httpx.AsyncClient(timeout=10.0) as http_client:
+        try:
+            response = await http_client.get(
+                f"{GUERRILLA_BASE_URL}?f=get_email_list&offset=0&sid_token={sid_token}"
+            )
+            response.raise_for_status()
+            data = response.json()
+            messages = data.get("list", [])
+            
+            # Transform to match Mail.tm format
+            transformed = []
+            for msg in messages:
+                transformed.append({
+                    "id": str(msg.get("mail_id", "")),
+                    "from": {
+                        "address": msg.get("mail_from", ""),
+                        "name": msg.get("mail_from", "")
+                    },
+                    "subject": msg.get("mail_subject", ""),
+                    "createdAt": msg.get("mail_timestamp", "")
+                })
+            
+            return transformed
+        except Exception as e:
+            logging.error(f"Error getting Guerrilla Mail messages: {e}")
+            return []
+
+
+async def get_guerrilla_message_detail(sid_token: str, message_id: str):
+    """Get message detail from Guerrilla Mail"""
+    async with httpx.AsyncClient(timeout=10.0) as http_client:
+        try:
+            response = await http_client.get(
+                f"{GUERRILLA_BASE_URL}?f=fetch_email&email_id={message_id}&sid_token={sid_token}"
+            )
+            response.raise_for_status()
+            msg = response.json()
+            
+            # Transform to match Mail.tm format
+            transformed = {
+                "id": str(msg.get("mail_id", message_id)),
+                "from": {
+                    "address": msg.get("mail_from", ""),
+                    "name": msg.get("mail_from", "")
+                },
+                "to": [{"address": msg.get("mail_recipient", "")}],
+                "subject": msg.get("mail_subject", ""),
+                "createdAt": msg.get("mail_timestamp", ""),
+                "text": [msg.get("mail_body", "")],
+                "html": [msg.get("mail_body", "")]
+            }
+            
+            return transformed
+        except Exception as e:
+            logging.error(f"Error getting Guerrilla Mail message detail: {e}")
+            return None
+
+
+# ============================================================================
+# TempMail.lol Service Functions
+# ============================================================================
+
+async def get_tempmail_lol_domains():
+    """Get available domains from TempMail.lol with caching"""
+    current_time = time.time()
+    service = "tempmail_lol"
+    
+    # Check cache first
+    if (_domain_cache[service]["domains"] and 
+        current_time - _domain_cache[service]["cached_at"] < _domain_cache[service]["ttl"]):
+        logging.info(f"Using cached TempMail.lol domains")
+        return _domain_cache[service]["domains"]
+    
+    # Fetch from API
+    async with httpx.AsyncClient(timeout=10.0) as http_client:
+        try:
+            response = await http_client.get(f"{TEMPMAIL_LOL_BASE_URL}/v1/domains")
+            response.raise_for_status()
+            domains = response.json()
+            
+            # Update cache
+            _domain_cache[service]["domains"] = domains
+            _domain_cache[service]["cached_at"] = current_time
+            logging.info(f"Cached {len(domains)} TempMail.lol domains")
+            return domains
+        except Exception as e:
+            logging.error(f"Error getting TempMail.lol domains: {e}")
+            return []
+
+
+async def create_tempmail_lol_account(username: str = None, domain: str = None):
+    """Create email on TempMail.lol"""
+    async with httpx.AsyncClient(timeout=10.0) as http_client:
+        try:
+            # Generate email address
+            if not domain:
+                domains = await get_tempmail_lol_domains()
+                if not domains:
+                    raise Exception("No domains available from TempMail.lol")
+                domain = domains[0]
+            
+            if not username:
+                username = ''.join(random.choices(string.ascii_lowercase + string.digits, k=10))
+            
+            address = f"{username}@{domain}"
+            
+            # TempMail.lol doesn't require account creation - emails just exist
+            return {
+                "address": address,
+                "username": username,
+                "domain": domain,
+                "token": address  # Use address as token for this service
+            }
+        except Exception as e:
+            logging.error(f"Error creating TempMail.lol account: {e}")
+            raise
+
+
+async def get_tempmail_lol_messages(address: str):
+    """Get messages from TempMail.lol"""
+    async with httpx.AsyncClient(timeout=10.0) as http_client:
+        try:
+            response = await http_client.get(f"{TEMPMAIL_LOL_BASE_URL}/v1/inbox/{address}")
+            response.raise_for_status()
+            messages = response.json()
+            
+            # Transform to match Mail.tm format
+            transformed = []
+            for msg in messages:
+                transformed.append({
+                    "id": str(msg.get("id", "")),
+                    "from": {
+                        "address": msg.get("from", ""),
+                        "name": msg.get("from", "")
+                    },
+                    "subject": msg.get("subject", ""),
+                    "createdAt": msg.get("date", "")
+                })
+            
+            return transformed
+        except Exception as e:
+            logging.error(f"Error getting TempMail.lol messages: {e}")
+            return []
+
+
+async def get_tempmail_lol_message_detail(address: str, message_id: str):
+    """Get message detail from TempMail.lol"""
+    async with httpx.AsyncClient(timeout=10.0) as http_client:
+        try:
+            response = await http_client.get(f"{TEMPMAIL_LOL_BASE_URL}/v1/message/{message_id}")
+            response.raise_for_status()
+            msg = response.json()
+            
+            # Transform to match Mail.tm format
+            transformed = {
+                "id": str(msg.get("id", message_id)),
+                "from": {
+                    "address": msg.get("from", ""),
+                    "name": msg.get("from", "")
+                },
+                "to": [{"address": msg.get("to", "")}],
+                "subject": msg.get("subject", ""),
+                "createdAt": msg.get("date", ""),
+                "text": [msg.get("text", "")],
+                "html": [msg.get("html", "")]
+            }
+            
+            return transformed
+        except Exception as e:
+            logging.error(f"Error getting TempMail.lol message detail: {e}")
+            return None
+
+
+# ============================================================================
+# DropMail Service Functions
+# ============================================================================
+
+async def get_dropmail_domains():
+    """Get available domains from DropMail with caching"""
+    current_time = time.time()
+    service = "dropmail"
+    
+    # Check cache first
+    if (_domain_cache[service]["domains"] and 
+        current_time - _domain_cache[service]["cached_at"] < _domain_cache[service]["ttl"]):
+        logging.info(f"Using cached DropMail domains")
+        return _domain_cache[service]["domains"]
+    
+    # Fetch from API
+    async with httpx.AsyncClient(timeout=10.0) as http_client:
+        try:
+            response = await http_client.get(f"{DROPMAIL_BASE_URL}/graphql/web-test-wgq6m5i?query={{%20availableDomains%20}}")
+            response.raise_for_status()
+            data = response.json()
+            domains = data.get("data", {}).get("availableDomains", [])
+            
+            # Update cache
+            _domain_cache[service]["domains"] = domains
+            _domain_cache[service]["cached_at"] = current_time
+            logging.info(f"Cached {len(domains)} DropMail domains")
+            return domains
+        except Exception as e:
+            logging.error(f"Error getting DropMail domains: {e}")
+            return ["dropmail.me", "10mail.org"]  # Fallback domains
+
+
+async def create_dropmail_account(username: str = None, domain: str = None):
+    """Create email on DropMail"""
+    async with httpx.AsyncClient(timeout=10.0) as http_client:
+        try:
+            # Get available domains if not specified
+            if not domain:
+                domains = await get_dropmail_domains()
+                if not domains:
+                    raise Exception("No domains available from DropMail")
+                domain = domains[0]
+            
+            if not username:
+                username = ''.join(random.choices(string.ascii_lowercase + string.digits, k=10))
+            
+            address = f"{username}@{domain}"
+            
+            # Create session via GraphQL
+            query = """
+            mutation {
+              introduceSession {
+                id
+                addresses {
+                  address
+                }
+              }
+            }
+            """
+            
+            response = await http_client.post(
+                f"{DROPMAIL_BASE_URL}/graphql/web-test-wgq6m5i",
+                json={"query": query}
+            )
+            response.raise_for_status()
+            data = response.json()
+            
+            session_id = data.get("data", {}).get("introduceSession", {}).get("id", "")
+            
+            # DropMail creates emails automatically
+            return {
+                "address": address,
+                "username": username,
+                "domain": domain,
+                "session_id": session_id or username  # Use session_id or fallback to username
+            }
+        except Exception as e:
+            logging.error(f"Error creating DropMail account: {e}")
+            # Fallback: just return the address without session
+            if not domain:
+                domain = "dropmail.me"
+            if not username:
+                username = ''.join(random.choices(string.ascii_lowercase + string.digits, k=10))
+            
+            return {
+                "address": f"{username}@{domain}",
+                "username": username,
+                "domain": domain,
+                "session_id": username
+            }
+
+
+async def get_dropmail_messages(session_id: str):
+    """Get messages from DropMail"""
+    async with httpx.AsyncClient(timeout=10.0) as http_client:
+        try:
+            query = """
+            query {
+              session {
+                mails {
+                  id
+                  headerFrom
+                  headerSubject
+                  rawSize
+                  downloadUrl
+                  createdAt
+                }
+              }
+            }
+            """
+            
+            response = await http_client.post(
+                f"{DROPMAIL_BASE_URL}/graphql/{session_id}",
+                json={"query": query}
+            )
+            response.raise_for_status()
+            data = response.json()
+            messages = data.get("data", {}).get("session", {}).get("mails", [])
+            
+            # Transform to match Mail.tm format
+            transformed = []
+            for msg in messages:
+                transformed.append({
+                    "id": str(msg.get("id", "")),
+                    "from": {
+                        "address": msg.get("headerFrom", ""),
+                        "name": msg.get("headerFrom", "")
+                    },
+                    "subject": msg.get("headerSubject", ""),
+                    "createdAt": msg.get("createdAt", "")
+                })
+            
+            return transformed
+        except Exception as e:
+            logging.error(f"Error getting DropMail messages: {e}")
+            return []
+
+
+async def get_dropmail_message_detail(session_id: str, message_id: str):
+    """Get message detail from DropMail"""
+    async with httpx.AsyncClient(timeout=10.0) as http_client:
+        try:
+            query = f"""
+            query {{
+              session {{
+                mail(id: "{message_id}") {{
+                  id
+                  headerFrom
+                  headerTo
+                  headerSubject
+                  text
+                  html
+                  createdAt
+                }}
+              }}
+            }}
+            """
+            
+            response = await http_client.post(
+                f"{DROPMAIL_BASE_URL}/graphql/{session_id}",
+                json={"query": query}
+            )
+            response.raise_for_status()
+            data = response.json()
+            msg = data.get("data", {}).get("session", {}).get("mail", {})
+            
+            # Transform to match Mail.tm format
+            transformed = {
+                "id": str(msg.get("id", message_id)),
+                "from": {
+                    "address": msg.get("headerFrom", ""),
+                    "name": msg.get("headerFrom", "")
+                },
+                "to": [{"address": msg.get("headerTo", "")}],
+                "subject": msg.get("headerSubject", ""),
+                "createdAt": msg.get("createdAt", ""),
+                "text": [msg.get("text", "")],
+                "html": [msg.get("html", "")]
+            }
+            
+            return transformed
+        except Exception as e:
+            logging.error(f"Error getting DropMail message detail: {e}")
+            return None
+
+
 
 
 # ============================================================================
