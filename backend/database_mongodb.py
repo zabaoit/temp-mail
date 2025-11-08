@@ -18,16 +18,18 @@ _client = None
 _database = None
 _emails_collection = None
 _history_collection = None
+_saved_collection = None
 
 def get_client():
     """Get or create MongoDB client"""
-    global _client, _database, _emails_collection, _history_collection
+    global _client, _database, _emails_collection, _history_collection, _saved_collection
     
     if _client is None:
         _client = AsyncIOMotorClient(MONGO_URL)
         _database = _client[DB_NAME]
         _emails_collection = _database.get_collection("temp_emails")
         _history_collection = _database.get_collection("email_history")
+        _saved_collection = _database.get_collection("saved_emails")
         print(f"✅ MongoDB connected: {MONGO_URL}")
         print(f"✅ Database: {DB_NAME}")
     
@@ -49,6 +51,11 @@ def history_collection():
     get_client()
     return _history_collection
 
+@property
+def saved_collection():
+    get_client()
+    return _saved_collection
+
 # Initialize on import
 get_client()
 
@@ -56,6 +63,7 @@ get_client()
 database = _database
 emails_collection = _emails_collection
 history_collection = _history_collection
+saved_collection = _saved_collection
 
 async def get_database():
     """Get database instance"""
