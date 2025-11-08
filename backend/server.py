@@ -1358,6 +1358,12 @@ async def get_message_detail(email_id: int, message_id: str, db: Session = Depen
         message = await get_mailgw_message_detail(email.token, message_id)
     elif email.provider == "1secmail":
         message = await get_1secmail_message_detail(email.username, email.domain, message_id)
+    elif email.provider == "guerrilla":
+        message = await get_guerrilla_message_detail(email.token, message_id)
+    elif email.provider == "tempmail_lol":
+        message = await get_tempmail_lol_message_detail(email.address, message_id)
+    elif email.provider == "dropmail":
+        message = await get_dropmail_message_detail(email.token, message_id)
     else:
         message = None
     
