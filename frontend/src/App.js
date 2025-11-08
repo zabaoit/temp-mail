@@ -1347,9 +1347,9 @@ function App() {
                     </div>
                   ) : (
                     <ScrollArea className="history-list">
-                      {historyEmails.map((email) => (
+                      {historyEmails.map((email, index) => (
                         <Card 
-                          key={email.id} 
+                          key={`history-${email.id}-${index}`} 
                           className={`history-card ${selectedHistoryIds.includes(email.id) ? 'selected' : ''}`}
                         >
                           <CardContent className="history-card-content">
