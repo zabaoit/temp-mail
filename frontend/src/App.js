@@ -833,29 +833,14 @@ function App() {
                         Làm mới 10 phút
                       </Button>
                       <Button
-                        onClick={() => {
-                          if (showServiceForm) {
-                            createNewEmail();
-                          } else {
-                            setShowServiceForm(true);
-                          }
-                        }}
+                        onClick={createNewEmail}
                         className="action-btn"
                         variant="outline"
                         disabled={loading}
                       >
                         <Edit className="h-5 w-5 mr-2" />
-                        {showServiceForm ? 'Tạo email' : 'Thay đổi'}
+                        Tạo email mới
                       </Button>
-                      {showServiceForm && (
-                        <Button
-                          onClick={() => setShowServiceForm(false)}
-                          className="action-btn"
-                          variant="outline"
-                        >
-                          Hủy
-                        </Button>
-                      )}
                       <Button
                         onClick={deleteCurrentEmail}
                         className="action-btn action-btn-danger"
