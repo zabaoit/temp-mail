@@ -86,6 +86,42 @@ function App() {
   const isCreatingEmailRef = useRef(false);
   const lastEmailIdRef = useRef(null);
 
+  // Check for duplicate IDs in historyEmails
+  useEffect(() => {
+    if (historyEmails.length > 0) {
+      const ids = historyEmails.map(e => e.id);
+      const uniqueIds = new Set(ids);
+      if (ids.length !== uniqueIds.size) {
+        console.error('🚨 DUPLICATE IDS in historyEmails:', {
+          totalEmails: ids.length,
+          uniqueIds: uniqueIds.size,
+          ids: ids,
+          duplicates: ids.filter((id, index) => ids.indexOf(id) !== index)
+        });
+      } else {
+        console.log('✅ No duplicate IDs in historyEmails', ids);
+      }
+    }
+  }, [historyEmails]);
+
+  // Check for duplicate IDs in savedEmails
+  useEffect(() => {
+    if (savedEmails.length > 0) {
+      const ids = savedEmails.map(e => e.id);
+      const uniqueIds = new Set(ids);
+      if (ids.length !== uniqueIds.size) {
+        console.error('🚨 DUPLICATE IDS in savedEmails:', {
+          totalEmails: ids.length,
+          uniqueIds: uniqueIds.size,
+          ids: ids,
+          duplicates: ids.filter((id, index) => ids.indexOf(id) !== index)
+        });
+      } else {
+        console.log('✅ No duplicate IDs in savedEmails', ids);
+      }
+    }
+  }, [savedEmails]);
+
   // Load services and domains
   useEffect(() => {
     loadDomainsForService(selectedService);
