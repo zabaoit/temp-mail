@@ -391,29 +391,52 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: var(--shadow-lg);
 }
 
-/* Action Buttons */
+/* Modern Action Buttons with Gradient */
 .action-buttons-group {
   display: flex;
   gap: 1rem;
   justify-content: center;
   flex-wrap: wrap;
+  animation: slideInUp 0.9s ease-out;
 }
 
 .action-btn {
-  padding: 0.75rem 1.5rem;
+  padding: 1rem 2rem;
   font-size: 1rem;
-  font-weight: 500;
-  border-radius: 8px;
+  font-weight: 600;
+  border-radius: 16px;
   border: 2px solid var(--border);
   background: var(--bg-secondary);
   color: var(--text-primary);
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.action-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--accent-gradient);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
 }
 
 .action-btn:hover:not(:disabled) {
-  border-color: var(--accent);
-  color: var(--accent);
-  background: var(--bg-tertiary);
+  border-color: transparent;
+  color: white;
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+.action-btn:hover:not(:disabled)::before {
+  opacity: 1;
+}
+
+.action-btn:active:not(:disabled) {
+  transform: translateY(-1px);
 }
 
 .action-btn:disabled {
@@ -421,9 +444,12 @@ h1, h2, h3, h4, h5, h6 {
   cursor: not-allowed;
 }
 
+.action-btn-danger::before {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
 .action-btn-danger:hover:not(:disabled) {
-  border-color: #ef4444;
-  color: #ef4444;
+  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.4);
 }
 
 /* Section Separator */
