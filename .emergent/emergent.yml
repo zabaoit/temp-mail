@@ -1,11 +1,4 @@
 {
-<<<<<<< HEAD
-  "env_image_name": "fastapi_react_mongo_shadcn_base_image_cloud_arm:release-31102025-4",
-  "job_id": "60fc0129-a54b-460f-9464-a059faaa3304",
-  "created_at": "2025-11-08T06:19:15.879258+00:00Z"
-=======
-  "env_image_name": "fastapi_react_mongo_shadcn_base_image_cloud_arm:release-06112025-1",
-  "job_id": "942f10d7-a99c-48f8-a27f-0fa580e115d2",
-  "created_at": "2025-11-08T06:54:31.770883+00:00Z"
->>>>>>> 9802088c29fbefbb5fe355e8fdb4e970da82d1fe
+  "job_id": "f0438aa4-e313-466c-bb3f-16f6ef1431a3",
+  "created_at": "2025-11-08T07:15:08.030187+00:00Z"
 }
