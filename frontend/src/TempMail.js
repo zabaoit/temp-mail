@@ -49,35 +49,57 @@ const TempMail = () => {
     }
   }, [currentEmail, activeTab]);
 
+  const loadEmailHistory = () => {
+    const history = JSON.parse(localStorage.getItem('emailHistory') || '[]');
+    setEmailHistory(history);
+  };
+
+  const saveToHistory = (email) => {
+    const history = JSON.parse(localStorage.getItem('emailHistory') || '[]');
+    const newHistory = [
+      { ...email, createdAt: new Date().toISOString() },
+      ...history.slice(0, 15), // Keep only last 16
+    ];
+    localStorage.setItem('emailHistory', JSON.stringify(newHistory));
+    setEmailHistory(newHistory);
+  };
+
   const fetchDomains = async () => {
     try {
-      setLoading(true);
       const response = await axios.get(`${API}/domains`);
       setDomains(response.data.domains || []);
     } catch (error) {
       console.error('Error fetching domains:', error);
-      alert('Không thể tải danh sách domain');
-    } finally {
-      setLoading(false);
     }
   };
 
   const createEmail = async () => {
-    if (!selectedService || !selectedDomain) {
-      alert('Vui lòng chọn service và domain');
-      return;
-    }
-
     try {
       setLoading(true);
+      
+      // Get domains for selected service
+      const serviceDomains = domains.filter(d => d.service === selectedService);
+      if (serviceDomains.length === 0) {
+        alert('Không tìm thấy domain cho service này');
+        return;
+      }
+
+      // Use first available domain
+      const domain = serviceDomains[0].domain;
+      
       const response = await axios.post(`${API}/create-email`, {
         service: selectedService,
-        domain: selectedDomain
+        domain: domain
       });
-      setCurrentEmail(response.data);
+      
+      const newEmail = response.data;
+      setCurrentEmail(newEmail);
       setMessages([]);
+      setTimeLeft(600); // Reset timer to 10 minutes
+      saveToHistory(newEmail);
+      
       // Fetch messages immediately
-      setTimeout(() => fetchMessages(response.data), 1000);
+      setTimeout(() => fetchMessages(newEmail), 1000);
     } catch (error) {
       console.error('Error creating email:', error);
       alert('Không thể tạo email. Vui lòng thử lại.');
