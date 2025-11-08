@@ -14,7 +14,7 @@ import random
 import string
 import uuid
 
-from database_mongodb import database, emails_collection, history_collection
+from database_mongodb import database, emails_collection, history_collection, saved_collection
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
