@@ -54,12 +54,12 @@ CORS_ORIGINS=*
 ### Frontend: `frontend/.env`
 ```env
 REACT_APP_BACKEND_URL=http://localhost:8001
-PORT=3000
+PORT=7050
 ```
 
 **Kiểm tra:**
 - [ ] `REACT_APP_BACKEND_URL=http://localhost:8001` (không có /api)
-- [ ] `PORT=3000` hoặc port bạn muốn dùng
+- [ ] `PORT=7050` hoặc port bạn muốn dùng
 
 ## ✅ Bước 3: Kiểm Tra Hệ Thống
 
