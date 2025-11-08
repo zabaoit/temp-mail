@@ -90,12 +90,12 @@ python -m uvicorn server:app --host 0.0.0.0 --port 8001 --reload
 ```bash
 cd frontend
 yarn install
-PORT=3000 yarn start
+PORT=7050 yarn start
 ```
 
 ## Truy Cập Ứng Dụng
 
-- **Frontend**: http://localhost:3000
+- **Frontend**: http://localhost:7050
 - **Backend API**: http://localhost:8001
 - **API Docs**: http://localhost:8001/docs
 
