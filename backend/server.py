@@ -928,7 +928,9 @@ async def refresh_messages(email_id: int):
     elif provider == "mailgw":
         messages = await get_mailgw_messages(email["token"])
     elif provider == "1secmail":
-        messages = await get_1secmail_messages(email["username"], email["domain"])
+        # 1secmail is disabled - return empty messages
+        logging.warning(f"⚠️ Cannot fetch messages for 1secmail email {email_id} (provider disabled)")
+        messages = []
     elif provider == "guerrilla":
         messages = await get_guerrilla_messages(email["token"])
     else:
