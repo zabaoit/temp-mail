@@ -62,14 +62,20 @@ _rate_limit_tracker = {
 _domain_cache = {
     "mailtm": {"domains": [], "cached_at": 0, "ttl": 300},
     "mailgw": {"domains": [], "cached_at": 0, "ttl": 300},
-    "1secmail": {"domains": [], "cached_at": 0, "ttl": 300}
+    "1secmail": {"domains": [], "cached_at": 0, "ttl": 300},
+    "guerrilla": {"domains": [], "cached_at": 0, "ttl": 300},
+    "tempmail_lol": {"domains": [], "cached_at": 0, "ttl": 300},
+    "dropmail": {"domains": [], "cached_at": 0, "ttl": 300}
 }
 
 # Provider tracking
 _provider_stats = {
     "mailtm": {"success": 0, "failures": 0, "last_failure": 0},
     "mailgw": {"success": 0, "failures": 0, "last_failure": 0},
-    "1secmail": {"success": 0, "failures": 0, "last_failure": 0}
+    "1secmail": {"success": 0, "failures": 0, "last_failure": 0},
+    "guerrilla": {"success": 0, "failures": 0, "last_failure": 0},
+    "tempmail_lol": {"success": 0, "failures": 0, "last_failure": 0},
+    "dropmail": {"success": 0, "failures": 0, "last_failure": 0}
 }
 
 
