@@ -106,6 +106,8 @@ class CreateEmailResponse(BaseModel):
     expires_at: str
     provider: str
     service_name: str
+    domain: Optional[str] = None
+    username: Optional[str] = None
 
 
 class DeleteHistoryRequest(BaseModel):
