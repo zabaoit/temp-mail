@@ -435,7 +435,11 @@ async def create_mailgw_account(address: str, password: str):
             if e.response.status_code == 429:
                 logging.warning("⚠️ Mail.gw rate limited (429)")
                 raise HTTPException(status_code=429, detail="Mail.gw rate limited")
-            raise
+            logging.error(f"❌ Mail.gw HTTP error: {e.response.status_code} - {e.response.text}")
+            raise HTTPException(status_code=e.response.status_code, detail=f"Mail.gw error: {e.response.status_code}")
+        except Exception as e:
+            logging.error(f"❌ Mail.gw connection error: {e}")
+            raise Exception(f"Mail.gw connection failed: {str(e)}")
 
 
 async def get_mailgw_token(address: str, password: str):
