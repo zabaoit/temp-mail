@@ -551,15 +551,17 @@ async def get_guerrilla_domains():
 async def create_guerrilla_account(username: str, domain: str):
     """Create Guerrilla Mail account"""
     # Guerrilla mail doesn't need explicit account creation
-    # Just use set_email_user API
+    # Just use set_email_user API with specified domain
     async with httpx.AsyncClient(timeout=10.0) as client:
         try:
+            # Use the requested domain in the API call
             response = await client.get(
-                f"{GUERRILLA_BASE_URL}?f=set_email_user&email_user={username}&lang=en&site=guerrillamail.com"
+                f"{GUERRILLA_BASE_URL}?f=set_email_user&email_user={username}&lang=en&site={domain}"
             )
             response.raise_for_status()
             data = response.json()
             
+            # Use email_addr from API response, which should match our requested domain
             address = data.get("email_addr", f"{username}@{domain}")
             sid_token = data.get("sid_token", str(uuid.uuid4()))
             
