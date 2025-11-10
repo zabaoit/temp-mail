@@ -445,6 +445,10 @@ function App() {
       setSelectedMessage(null);
       setShowServiceForm(false); // Hide form after creation
       
+      // CRITICAL FIX: Reset the creating email ref so timer works correctly
+      isCreatingEmailRef.current = false;
+      lastEmailIdRef.current = newEmail.id;
+      
       toast.success('Email mới đã được tạo!', {
         description: `${newEmail.address} (${newEmail.service_name || newEmail.provider})`
       });
