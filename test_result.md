@@ -103,7 +103,16 @@
 #====================================================================================================
 
 user_problem_statement: |
-  UPDATE 2025-11-08 (Latest - Save Email Feature):
+  UPDATE 2025-01-08 (Latest - MySQL Migration & Guerrilla Mail HTML Fix):
+  ✅ CHUYỂN ĐỔI HOÀN TOÀN SANG MYSQL - HOÀN THÀNH
+  1. ✅ Loại bỏ hoàn toàn MongoDB (xóa motor, pymongo, database_mongodb.py)
+  2. ✅ Chuyển sang MySQL với SQLAlchemy
+  3. ✅ Background tasks sử dụng SQLAlchemy Session
+  4. ✅ Tất cả API endpoints sử dụng MySQL
+  5. ✅ Fix HTML rendering cho Guerrilla Mail provider
+  6. ✅ Cleanup .env (xóa MONGO_URL)
+  
+  Previous UPDATE 2025-11-08 (Save Email Feature):
   ✅ THÊM TÍNH NĂNG LƯU EMAIL - HOÀN THÀNH
   1. ✅ Nút "Lưu" khi xem chi tiết email
   2. ✅ Tab "Mail đã lưu" với danh sách email đã save
