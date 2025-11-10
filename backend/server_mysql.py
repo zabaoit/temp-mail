@@ -15,7 +15,7 @@ import string
 import time
 
 from sqlalchemy.orm import Session
-from database import get_db, engine
+from database import get_db, engine, SessionLocal
 from models import TempEmail, EmailHistory, SavedEmail, Base
 
 ROOT_DIR = Path(__file__).parent
