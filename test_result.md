@@ -103,7 +103,18 @@
 #====================================================================================================
 
 user_problem_statement: |
-  UPDATE 2025-01-08 (Latest - MySQL Migration & Guerrilla Mail HTML Fix):
+  UPDATE 2025-11-10 (Latest - Container Fix & Documentation Cleanup):
+  ✅ SỬA LỖI CONTAINER & DỌN DẸP TÀI LIỆU - HOÀN THÀNH
+  1. ✅ Khắc phục lỗi backend không khởi động trong container (thiếu database_mongodb.py)
+  2. ✅ Tạo database_mongodb.py và background_tasks_mongodb.py cho container environment
+  3. ✅ Container sử dụng MongoDB, local development sử dụng MySQL
+  4. ✅ Dọn dẹp tài liệu: Chỉ giữ lại README.md (English) và HUONG_DAN.md (Vietnamese)
+  5. ✅ Xóa 15+ file documentation cũ (AUTO_FEATURES.md, FIXES_APPLIED.md, etc.)
+  6. ✅ Tài liệu mới tập trung vào MySQL local setup
+  7. ✅ Email creation working - app tự động tạo email khi mở
+  8. ✅ Guerrilla Mail HTML rendering working correctly
+  
+  Previous UPDATE 2025-01-08 (MySQL Migration & Guerrilla Mail HTML Fix):
   ✅ CHUYỂN ĐỔI HOÀN TOÀN SANG MYSQL - HOÀN THÀNH
   1. ✅ Loại bỏ hoàn toàn MongoDB (xóa motor, pymongo, database_mongodb.py)
   2. ✅ Chuyển sang MySQL với SQLAlchemy
