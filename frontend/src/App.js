@@ -923,7 +923,6 @@ function App() {
                             <option value="mailtm">Mail.tm</option>
                             <option value="1secmail">1secmail</option>
                             <option value="mailgw">Mail.gw</option>
-                            <option value="guerrilla">Guerrilla Mail</option>
                           </select>
                         </div>
                         <div className="form-group">
@@ -1178,7 +1177,6 @@ function App() {
                             <option value="mailtm">Mail.tm</option>
                             <option value="1secmail">1secmail</option>
                             <option value="mailgw">Mail.gw</option>
-                            <option value="guerrilla">Guerrilla Mail</option>
                           </select>
                         </div>
                         <div className="form-group">
