@@ -579,6 +579,62 @@ backend:
           - Đảm bảo tất cả endpoints dùng cùng kiểu dữ liệu cho ID
 
 frontend:
+  - task: "Timer luôn hiển thị 0:00 và xóa Guerrilla Mail từ UI"
+    implemented: true
+    working: true
+    file: "src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: |
+          ✅ TIMER DISPLAY & GUERRILLA MAIL REMOVAL
+          
+          1. Timer Display (Line 379-382):
+          Trước:
+          ```javascript
+          const formatTime = (seconds) => {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+          };
+          ```
+          
+          Sau:
+          ```javascript
+          const formatTime = (seconds) => {
+            // Always display 0:00 as per user requirement
+            return '0:00';
+          };
+          ```
+          
+          Kết quả:
+          - Timer UI luôn hiển thị "0:00"
+          - Backend vẫn theo dõi expires_at (10 phút)
+          - Background task vẫn tự động tạo email mới sau 10 phút
+          
+          2. Xóa Guerrilla Mail từ UI:
+          
+          A. Service Map (Line ~833):
+          - Xóa: 'guerrilla': 'Guerrilla Mail'
+          - Chỉ còn: Mail.tm, Mail.gw, 1secmail, TempMail.lol
+          
+          B. Dropdown Menu 1 (Line ~920-927):
+          - Xóa: <option value="guerrilla">Guerrilla Mail</option>
+          - Còn lại: Random, Mail.tm, 1secmail, Mail.gw
+          
+          C. Dropdown Menu 2 (Line ~1175-1182):
+          - Xóa: <option value="guerrilla">Guerrilla Mail</option>
+          - Còn lại: Random, Mail.tm, 1secmail, Mail.gw
+          
+          Kết quả cuối cùng:
+          ✅ Timer luôn là "0:00" (không countdown)
+          ✅ Backend vẫn expire email sau 10 phút
+          ✅ Guerrilla Mail không còn trong UI
+          ✅ User chỉ có thể chọn 3 providers: Mail.tm, 1secmail, Mail.gw
+
   - task: "Fix HTML content rendering"
     implemented: true
     working: true
