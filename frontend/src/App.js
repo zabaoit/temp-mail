@@ -428,6 +428,17 @@ function App() {
   const createNewEmail = async () => {
     setLoading(true);
     try {
+      // Delete old email first if exists (don't save to history, just delete)
+      if (currentEmail?.id) {
+        try {
+          await axios.delete(`${API}/emails/${currentEmail.id}`);
+          console.log('🗑️ Deleted old email:', currentEmail.address);
+        } catch (deleteError) {
+          console.warn('⚠️ Could not delete old email:', deleteError);
+          // Continue anyway to create new email
+        }
+      }
+      
       const payload = {
         service: selectedService
       };
@@ -450,11 +461,10 @@ function App() {
       lastEmailIdRef.current = newEmail.id;
       
       toast.success('Email mới đã được tạo!', {
-        description: `${newEmail.address} (${newEmail.service_name || newEmail.provider})`
+        description: `${newEmail.address} - Timer: 10 phút`
       });
       
-      // Reload history in case old email was moved there
-      await loadHistory();
+      // Don't reload history since we deleted the old email instead of moving it
       await refreshMessages(newEmail.id, false);
     } catch (error) {
       toast.error('Không thể tạo email mới', {
