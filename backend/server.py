@@ -778,9 +778,22 @@ async def create_email_with_failover(username: Optional[str] = None, preferred_s
             _provider_stats[provider]["failures"] += 1
             errors.append(f"{provider}: {str(e)}")
     
+    # Build detailed error message
+    error_parts = []
+    if skipped_providers:
+        error_parts.append(f"Providers in cooldown: {', '.join(skipped_providers)}")
+    if errors:
+        error_parts.append(f"Errors: {', '.join(errors)}")
+    
+    error_message = "Tất cả dịch vụ email đều không khả dụng"
+    if error_parts:
+        error_message += f". {' | '.join(error_parts)}"
+    
+    logging.error(f"❌ All providers failed: {error_message}")
+    
     raise HTTPException(
         status_code=503,
-        detail=f"Tất cả dịch vụ email đều không khả dụng. Lỗi: {', '.join(errors)}"
+        detail=error_message
     )
 
 
