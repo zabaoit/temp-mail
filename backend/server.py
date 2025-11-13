@@ -18,7 +18,7 @@ ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
 # Detect environment: Check if MySQL is available
-USE_MONGODB = os.getenv("USE_MONGODB", "false").lower() == "true"
+USE_MONGODB = False
 
 # Try to detect MySQL availability
 if not USE_MONGODB:
@@ -29,7 +29,7 @@ if not USE_MONGODB:
         logging.info("✅ MySQL detected - using MySQL")
     except:
         logging.warning("⚠️ MySQL not available - switching to MongoDB")
-        USE_MONGODB = True
+        USE_MONGODB = False  # keep MySQL even if probe fails
 
 if USE_MONGODB:
     # MongoDB setup
@@ -77,6 +77,22 @@ _provider_stats = {
     "guerrilla": {"success": 0, "failures": 0, "cooldown_until": 0},
     "tempmail_lol": {"success": 0, "failures": 0, "cooldown_until": 0}
 }
+
+# TTL configuration (minutes)
+EMAIL_TTL_MINUTES = int(os.getenv("EMAIL_TTL_MINUTES", "10"))
+
+# Username sanitization helper
+def sanitize_username(raw: Optional[str]) -> str:
+    """Normalize username; avoid Swagger default 'string' and invalid chars."""
+    if not raw:
+        return ''.join(random.choices(string.ascii_lowercase + string.digits, k=10))
+    u = str(raw).strip().lower()
+    if u == "string":
+        return ''.join(random.choices(string.ascii_lowercase + string.digits, k=10))
+    allowed = ''.join(ch for ch in u if ch.isalnum() or ch in ['.', '_', '-'])
+    if len(allowed) < 3:
+        return ''.join(random.choices(string.ascii_lowercase + string.digits, k=10))
+    return allowed[:30]
 
 # Browser headers
 BROWSER_HEADERS = {
@@ -240,6 +256,12 @@ async def get_mailtm_messages(token: str):
             response.raise_for_status()
             data = response.json()
             return data.get("hydra:member", [])
+        except httpx.HTTPStatusError as e:
+            if e.response is not None and e.response.status_code == 401:
+                # Bubble up 401 so caller can refresh token
+                raise HTTPException(status_code=401, detail="mailtm unauthorized")
+            logging.error(f"Error getting Mail.tm messages (HTTP): {e}")
+            return []
         except Exception as e:
             logging.error(f"Error getting Mail.tm messages: {e}")
             return []
@@ -278,6 +300,11 @@ async def get_mailtm_message_detail(token: str, message_id: str):
                 data["text"] = []
             
             return data
+        except httpx.HTTPStatusError as e:
+            if e.response is not None and e.response.status_code == 401:
+                raise HTTPException(status_code=401, detail="mailtm unauthorized")
+            logging.error(f"Error getting Mail.tm message detail (HTTP): {e}")
+            return None
         except Exception as e:
             logging.error(f"Error getting Mail.tm message detail: {e}")
             return None
@@ -300,6 +327,11 @@ async def get_1secmail_domains():
         "1secmail.com", "1secmail.org", "1secmail.net",
         "wwjmp.com", "esiix.com", "xojxe.com", "yoggm.com"
     ]
+    # Avoid hitting 1secmail domain API (often 403). Use fallbacks immediately.
+    cache["domains"] = FALLBACK_DOMAINS
+    cache["expires_at"] = now + DOMAIN_CACHE_TTL
+    logging.info("Using 1secmail fallback domains (skipping API)")
+    return FALLBACK_DOMAINS
     
     for attempt in range(RETRY_MAX_ATTEMPTS):
         async with httpx.AsyncClient(timeout=10.0) as client:
@@ -375,6 +407,11 @@ async def get_1secmail_messages(username: str, domain: str):
                     "createdAt": msg.get("date", datetime.now(timezone.utc).isoformat())
                 })
             return transformed
+        except httpx.HTTPStatusError as e:
+            if e.response is not None and e.response.status_code == 403:
+                set_provider_cooldown("1secmail", PROVIDER_COOLDOWN_SECONDS)
+            logging.error(f"Error getting 1secmail messages (HTTP): {e}")
+            return []
         except Exception as e:
             logging.error(f"Error getting 1secmail messages: {e}")
             return []
@@ -402,6 +439,11 @@ async def get_1secmail_message_detail(username: str, domain: str, message_id: st
                 "html": [msg.get("htmlBody", "")] if msg.get("htmlBody") else [],
                 "text": [msg.get("textBody", "")] if msg.get("textBody") else []
             }
+        except httpx.HTTPStatusError as e:
+            if e.response is not None and e.response.status_code == 403:
+                set_provider_cooldown("1secmail", PROVIDER_COOLDOWN_SECONDS)
+            logging.error(f"Error getting 1secmail message detail (HTTP): {e}")
+            return None
         except Exception as e:
             logging.error(f"Error getting 1secmail message detail: {e}")
             return None
@@ -494,6 +536,11 @@ async def get_mailgw_messages(token: str):
             response.raise_for_status()
             data = response.json()
             return data.get("hydra:member", [])
+        except httpx.HTTPStatusError as e:
+            if e.response is not None and e.response.status_code == 401:
+                raise HTTPException(status_code=401, detail="mailgw unauthorized")
+            logging.error(f"Error getting mail.gw messages (HTTP): {e}")
+            return []
         except Exception as e:
             logging.error(f"Error getting mail.gw messages: {e}")
             return []
@@ -532,6 +579,11 @@ async def get_mailgw_message_detail(token: str, message_id: str):
                 data["text"] = []
             
             return data
+        except httpx.HTTPStatusError as e:
+            if e.response is not None and e.response.status_code == 401:
+                raise HTTPException(status_code=401, detail="mailgw unauthorized")
+            logging.error(f"Error getting mail.gw message detail (HTTP): {e}")
+            return None
         except Exception as e:
             logging.error(f"Error getting mail.gw message detail: {e}")
             return None
@@ -662,8 +714,8 @@ async def get_guerrilla_message_detail(sid_token: str, message_id: str):
 async def create_email_with_failover(username: Optional[str] = None, preferred_service: str = "auto", preferred_domain: Optional[str] = None):
     """Create email with smart failover between providers"""
     
-    if not username:
-        username = ''.join(random.choices(string.ascii_lowercase + string.digits, k=10))
+    # Normalize/sanitize username input (avoid Swagger default 'string')
+    username = sanitize_username(username)
     
     password = ''.join(random.choices(string.ascii_letters + string.digits, k=16))
     
@@ -678,7 +730,6 @@ async def create_email_with_failover(username: Optional[str] = None, preferred_s
     else:
         # Auto mode: try all providers in random order (removed guerrilla)
         providers_to_try = ["mailtm", "mailgw", "1secmail"]
-        random.shuffle(providers_to_try)
         logging.info(f"🎲 Random provider order: {providers_to_try}")
     
     errors = []
@@ -862,8 +913,9 @@ async def create_email(request: CreateEmailRequest, db: Session = Depends(get_db
             preferred_domain=request.domain
         )
         
-        now = datetime.now(timezone.utc)
-        expires_at = now + timedelta(minutes=10)
+        # Use naive UTC consistently for MySQL DATETIME
+        now = datetime.utcnow()
+        expires_at = now + timedelta(minutes=EMAIL_TTL_MINUTES)
         
         email_doc = TempEmail(
             address=email_data["address"],
@@ -887,8 +939,8 @@ async def create_email(request: CreateEmailRequest, db: Session = Depends(get_db
         return CreateEmailResponse(
             id=email_doc.id,
             address=email_doc.address,
-            created_at=email_doc.created_at.isoformat(),
-            expires_at=email_doc.expires_at.isoformat(),
+            created_at=email_doc.created_at.replace(tzinfo=timezone.utc).isoformat() if email_doc.created_at.tzinfo is None else email_doc.created_at.isoformat(),
+            expires_at=email_doc.expires_at.replace(tzinfo=timezone.utc).isoformat() if email_doc.expires_at.tzinfo is None else email_doc.expires_at.isoformat(),
             provider=email_doc.provider,
             service_name=email_data["service_name"]
         )
@@ -926,9 +978,34 @@ async def get_email_messages(email_id: int, db: Session = Depends(get_db)):
     provider = email.provider
     
     if provider == "mailtm":
-        messages = await get_mailtm_messages(email.token)
+        try:
+            messages = await get_mailtm_messages(email.token)
+        except HTTPException as e:
+            if e.status_code == 401:
+                # Refresh token and retry once
+                try:
+                    new_token = await get_mailtm_token(email.address, email.password)
+                    email.token = new_token
+                    db.commit()
+                    messages = await get_mailtm_messages(new_token)
+                except Exception:
+                    messages = []
+            else:
+                raise
     elif provider == "mailgw":
-        messages = await get_mailgw_messages(email.token)
+        try:
+            messages = await get_mailgw_messages(email.token)
+        except HTTPException as e:
+            if e.status_code == 401:
+                try:
+                    new_token = await get_mailgw_token(email.address, email.password)
+                    email.token = new_token
+                    db.commit()
+                    messages = await get_mailgw_messages(new_token)
+                except Exception:
+                    messages = []
+            else:
+                raise
     elif provider == "1secmail":
         username = email.username or email.address.split("@")[0]
         domain = email.domain or email.address.split("@")[1]
@@ -954,9 +1031,33 @@ async def get_message_detail(email_id: int, message_id: str, db: Session = Depen
     provider = email.provider
     
     if provider == "mailtm":
-        message = await get_mailtm_message_detail(email.token, message_id)
+        try:
+            message = await get_mailtm_message_detail(email.token, message_id)
+        except HTTPException as e:
+            if e.status_code == 401:
+                try:
+                    new_token = await get_mailtm_token(email.address, email.password)
+                    email.token = new_token
+                    db.commit()
+                    message = await get_mailtm_message_detail(new_token, message_id)
+                except Exception:
+                    message = None
+            else:
+                raise
     elif provider == "mailgw":
-        message = await get_mailgw_message_detail(email.token, message_id)
+        try:
+            message = await get_mailgw_message_detail(email.token, message_id)
+        except HTTPException as e:
+            if e.status_code == 401:
+                try:
+                    new_token = await get_mailgw_token(email.address, email.password)
+                    email.token = new_token
+                    db.commit()
+                    message = await get_mailgw_message_detail(new_token, message_id)
+                except Exception:
+                    message = None
+            else:
+                raise
     elif provider == "1secmail":
         username = email.username or email.address.split("@")[0]
         domain = email.domain or email.address.split("@")[1]
@@ -982,9 +1083,33 @@ async def refresh_messages(email_id: int, db: Session = Depends(get_db)):
     provider = email.provider
     
     if provider == "mailtm":
-        messages = await get_mailtm_messages(email.token)
+        try:
+            messages = await get_mailtm_messages(email.token)
+        except HTTPException as e:
+            if e.status_code == 401:
+                try:
+                    new_token = await get_mailtm_token(email.address, email.password)
+                    email.token = new_token
+                    db.commit()
+                    messages = await get_mailtm_messages(new_token)
+                except Exception:
+                    messages = []
+            else:
+                raise
     elif provider == "mailgw":
-        messages = await get_mailgw_messages(email.token)
+        try:
+            messages = await get_mailgw_messages(email.token)
+        except HTTPException as e:
+            if e.status_code == 401:
+                try:
+                    new_token = await get_mailgw_token(email.address, email.password)
+                    email.token = new_token
+                    db.commit()
+                    messages = await get_mailgw_messages(new_token)
+                except Exception:
+                    messages = []
+            else:
+                raise
     elif provider == "1secmail":
         username = email.username or email.address.split("@")[0]
         domain = email.domain or email.address.split("@")[1]
@@ -1007,6 +1132,18 @@ async def delete_email(email_id: int, db: Session = Depends(get_db)):
     if not email:
         raise HTTPException(status_code=404, detail="Email not found")
     
+    deletion_time = datetime.utcnow()
+    history_email = EmailHistory(
+        address=email.address,
+        password=email.password,
+        token=email.token,
+        account_id=email.account_id,
+        created_at=email.created_at,
+        expired_at=deletion_time,
+        message_count=email.message_count
+    )
+    
+    db.add(history_email)
     db.delete(email)
     db.commit()
     
@@ -1020,17 +1157,18 @@ async def extend_email_time(email_id: int, db: Session = Depends(get_db)):
     if not email:
         raise HTTPException(status_code=404, detail="Email not found")
     
-    now = datetime.now(timezone.utc)
-    new_expires_at = now + timedelta(minutes=10)
+    # Use naive UTC for consistency with MySQL DATETIME
+    now = datetime.utcnow()
+    new_expires_at = now + timedelta(minutes=EMAIL_TTL_MINUTES)
     
     email.expires_at = new_expires_at
     db.commit()
     
-    logging.info(f"⏰ Extended time for {email.address}: {new_expires_at.isoformat()}")
+    logging.info(f"⏰ Extended time for {email.address}: {new_expires_at.replace(tzinfo=timezone.utc).isoformat()}")
     
     return {
         "status": "extended",
-        "expires_at": new_expires_at.isoformat()
+        "expires_at": new_expires_at.replace(tzinfo=timezone.utc).isoformat()
     }
 
 
@@ -1306,37 +1444,19 @@ async def background_task_loop():
     while True:
         try:
             db = SessionLocal()
-            now = datetime.now(timezone.utc)
-            
-            # Find expired emails
+            # Use naive UTC to match stored DATETIME
+            now = datetime.utcnow()
+
+            # Auto-extend emails instead of deleting once TTL is reached
             expired_emails = db.query(TempEmail).filter(TempEmail.expires_at <= now).all()
-            
+
             if expired_emails:
-                logging.info(f"Found {len(expired_emails)} expired emails")
-                
                 for email in expired_emails:
-                    try:
-                        # Move to history
-                        history_email = EmailHistory(
-                            address=email.address,
-                            password=email.password,
-                            token=email.token,
-                            account_id=email.account_id,
-                            created_at=email.created_at,
-                            expired_at=email.expires_at,
-                            message_count=email.message_count
-                        )
-                        
-                        db.add(history_email)
-                        db.delete(email)
-                        db.commit()
-                        
-                        logging.info(f"Moved email to history: {email.address}")
-                    except Exception as e:
-                        logging.error(f"Error moving email {email.address} to history: {e}")
-                        db.rollback()
-                        continue
-            
+                    email.expires_at = now + timedelta(minutes=EMAIL_TTL_MINUTES)
+
+                db.commit()
+                logging.info(f"Auto-extended {len(expired_emails)} emails to keep them active")
+
             db.close()
         except Exception as e:
             logging.error(f"❌ Error in background task loop: {e}")
@@ -1370,3 +1490,4 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+

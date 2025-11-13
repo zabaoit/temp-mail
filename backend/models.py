@@ -10,7 +10,8 @@ class TempEmail(Base):
     password = Column(String(255), nullable=False)
     token = Column(Text, nullable=False)
     account_id = Column(String(255), nullable=False)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+    # Store naive UTC in MySQL DATETIME
+    created_at = Column(DateTime, default=lambda: datetime.utcnow(), nullable=False)
     expires_at = Column(DateTime, nullable=False)  # Expiry time
     message_count = Column(Integer, default=0, nullable=False)
     provider = Column(String(50), default="mailtm", nullable=False)  # Provider tracking (mailtm/mailgw/1secmail)
@@ -94,7 +95,7 @@ class SavedEmail(Base):
     html = Column(Text, nullable=True)  # HTML content
     text = Column(Text, nullable=True)  # Text content
     created_at = Column(DateTime, nullable=False)  # When message was created
-    saved_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)  # When saved
+    saved_at = Column(DateTime, default=lambda: datetime.utcnow(), nullable=False)  # When saved
     
     def to_dict(self):
         """Convert model to dictionary"""
