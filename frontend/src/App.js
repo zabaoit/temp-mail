@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { ThemeProvider } from 'next-themes';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 import { Toaster } from '@/components/ui/sonner';
 import { 
   Mail, Copy, Trash2, RefreshCw, Sun, Moon, 
-  Clock, Edit, Inbox, History, Server, Bookmark
+  Edit, Inbox, History, Server, Bookmark
 } from 'lucide-react';
 import './App.css';
 
@@ -49,22 +49,19 @@ function ThemeToggle() {
 function App() {
   // Random hero titles
   const heroTitles = [
-    "Email tạm thời của bạn",
-    "Địa chỉ email 10 phút",
-    "Email dùng một lần",
-    "Hộp thư tức thời của bạn",
+    
     "Email ảo an toàn"
   ];
   const [heroTitle] = useState(() => heroTitles[Math.floor(Math.random() * heroTitles.length)]);
   
   const [currentEmail, setCurrentEmail] = useState(null);
+  const [emailList, setEmailList] = useState([]);
   const [historyEmails, setHistoryEmails] = useState([]);
   const [savedEmails, setSavedEmails] = useState([]);
   const [messages, setMessages] = useState([]);
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(0);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [activeTab, setActiveTab] = useState('current');
   const [selectedHistoryIds, setSelectedHistoryIds] = useState([]);
@@ -82,10 +79,6 @@ function App() {
   const [loadingDomains, setLoadingDomains] = useState(false);
   const [showServiceForm, setShowServiceForm] = useState(false);
   
-  // Refs to prevent race conditions
-  const isCreatingEmailRef = useRef(false);
-  const lastEmailIdRef = useRef(null);
-
   // Check for duplicate IDs in historyEmails
   useEffect(() => {
     if (historyEmails.length > 0) {
@@ -155,6 +148,7 @@ function App() {
         // Load existing emails
         const response = await axios.get(`${API}/emails`);
         const emails = response.data;
+        setEmailList(emails);
         
         if (emails.length > 0) {
           // Set the first email as current
@@ -180,9 +174,10 @@ function App() {
             setCurrentEmail(newEmail);
             setMessages([]);
             setSelectedMessage(null);
+            setEmailList([newEmail]);
             
             toast.success('Email mới đã được tạo!', {
-              description: `${newEmail.address} (${newEmail.service_name || newEmail.provider})`
+              description: `${newEmail.address} - Không hết hạn`
             });
           } catch (createErr) {
             toast.error('Không thể tạo email mới', {
@@ -246,9 +241,10 @@ function App() {
           
           setCurrentEmail(newEmail);
           setMessages([]);
+          setEmailList([newEmail]);
           
           toast.success('Email mới đã được tạo!', {
-            description: `${newEmail.address} (${newEmail.service_name || newEmail.provider})`
+            description: `${newEmail.address} - Không hết hạn`
           });
         } catch (createErr) {
           toast.error('Không thể khởi tạo ứng dụng');
@@ -259,99 +255,10 @@ function App() {
     initializeApp();
   }, []);
 
-  // Timer countdown - calculate from expires_at with auto-create on expiry
-  useEffect(() => {
-    if (currentEmail && currentEmail.expires_at && !currentEmail.isHistory) {
-      // Reset flag when email changes
-      if (lastEmailIdRef.current !== currentEmail.id) {
-        isCreatingEmailRef.current = false;
-        lastEmailIdRef.current = currentEmail.id;
-      }
-      
-      const updateTimer = async () => {
-        // CRITICAL FIX: Use UTC for both to avoid timezone mismatch
-        const now = new Date();  // Local time
-        const expiresAt = new Date(currentEmail.expires_at);  // Will parse with timezone
-        const diffSeconds = Math.floor((expiresAt - now) / 1000);
-        
-        // Debug logging
-        console.log(`⏱️  Timer Update - Now: ${now.toISOString()}, Expires: ${expiresAt.toISOString()}, Diff: ${diffSeconds}s`);
-        
-        if (diffSeconds <= 0) {
-          setTimeLeft(0);
-          
-          // Email expired, auto-create new email (only once using ref)
-          if (!isCreatingEmailRef.current) {
-            isCreatingEmailRef.current = true;
-            console.log('⏰ Timer expired, auto-creating new email...');
-            toast.info('⏰ Email đã hết hạn, đang tạo email mới tự động...');
-            
-            try {
-              const response = await axios.post(`${API}/emails/create`, {
-                service: selectedService
-              });
-              const newEmail = response.data;
-              
-              setCurrentEmail(newEmail);
-              setMessages([]);
-              setSelectedMessage(null);
-              
-              toast.success('✅ Email mới đã được tạo tự động!', {
-                description: `${newEmail.address} (${newEmail.service_name || newEmail.provider})`,
-                duration: 5000
-              });
-              
-              // Reload history
-              try {
-                const historyResponse = await axios.get(`${API}/emails/history/list`);
-                
-                // Deduplicate by ID to prevent duplicate key errors
-                const uniqueHistory = [];
-                const seenIds = new Set();
-                
-                for (const email of historyResponse.data) {
-                  if (!seenIds.has(email.id)) {
-                    seenIds.add(email.id);
-                    uniqueHistory.push(email);
-                  } else {
-                    console.warn(`⚠️ Duplicate history email ID found and removed: ${email.id}`);
-                  }
-                }
-                
-                setHistoryEmails(uniqueHistory);
-              } catch (err) {
-                console.error('Error reloading history:', err);
-              }
-            } catch (error) {
-              console.error('Auto-create email error:', error);
-              toast.error('Không thể tạo email mới tự động', {
-                description: error.response?.data?.detail || 'Lỗi không xác định'
-              });
-              // Reset flag to allow retry
-              isCreatingEmailRef.current = false;
-            }
-          }
-        } else {
-          setTimeLeft(diffSeconds);
-        }
-      };
-      
-      // Update immediately
-      updateTimer();
-      
-      // Update every second
-      const timer = setInterval(updateTimer, 1000);
-      return () => {
-        clearInterval(timer);
-      };
-    } else if (!currentEmail) {
-      setTimeLeft(0);
-    }
-  }, [currentEmail?.id, currentEmail?.expires_at, currentEmail?.isHistory, selectedService]);
 
   // Auto refresh messages every 30 seconds (silent mode)
   useEffect(() => {
-    if (currentEmail?.id && autoRefresh && !currentEmail?.isHistory) {
+    if (currentEmail?.id && autoRefresh) {
       console.log('🔄 Auto-refresh enabled for email:', currentEmail.address);
       
       const interval = setInterval(() => {
@@ -366,7 +273,7 @@ function App() {
         clearInterval(interval);
       };
     }
-  }, [currentEmail?.id, currentEmail?.isHistory, autoRefresh]);
+  }, [currentEmail?.id, autoRefresh]);
 
   // Reset view mode when changing tabs
   useEffect(() => {
@@ -376,11 +283,6 @@ function App() {
     setHistoryMessages([]);
   }, [activeTab]);
 
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
 
   const loadEmails = async () => {
     try {
@@ -428,17 +330,6 @@ function App() {
   const createNewEmail = async () => {
     setLoading(true);
     try {
-      // Delete old email first if exists (don't save to history, just delete)
-      if (currentEmail?.id) {
-        try {
-          await axios.delete(`${API}/emails/${currentEmail.id}`);
-          console.log('🗑️ Deleted old email:', currentEmail.address);
-        } catch (deleteError) {
-          console.warn('⚠️ Could not delete old email:', deleteError);
-          // Continue anyway to create new email
-        }
-      }
-      
       const payload = {
         service: selectedService
       };
@@ -456,15 +347,12 @@ function App() {
       setSelectedMessage(null);
       setShowServiceForm(false); // Hide form after creation
       
-      // CRITICAL FIX: Reset the creating email ref so timer works correctly
-      isCreatingEmailRef.current = false;
-      lastEmailIdRef.current = newEmail.id;
+      setEmailList(prev => [newEmail, ...prev.filter(email => email.id !== newEmail.id)]);
       
       toast.success('Email mới đã được tạo!', {
-        description: `${newEmail.address} - Timer: 10 phút`
+        description: `${newEmail.address} - Không hết hạn`
       });
       
-      // Don't reload history since we deleted the old email instead of moving it
       await refreshMessages(newEmail.id, false);
     } catch (error) {
       toast.error('Không thể tạo email mới', {
@@ -472,6 +360,26 @@ function App() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+  
+  const handleSelectExistingEmail = async (event) => {
+    const selectedId = parseInt(event.target.value, 10);
+    if (Number.isNaN(selectedId) || selectedId === currentEmail?.id) {
+      return;
+    }
+    
+    const selected = emailList.find(email => email.id === selectedId);
+    if (!selected) return;
+    
+    setCurrentEmail(selected);
+    setMessages([]);
+    setSelectedMessage(null);
+    
+    try {
+      await refreshMessages(selected.id, false);
+    } catch (error) {
+      console.error('Không thể tải email đã chọn:', error);
     }
   };
 
@@ -482,37 +390,26 @@ function App() {
     try {
       await axios.delete(`${API}/emails/${currentEmail.id}`);
       
+      const updatedList = emailList.filter(email => email.id !== currentEmail.id);
+      setEmailList(updatedList);
+      
       toast.success('Email đã được xóa');
       
-      // Clear current email
-      setCurrentEmail(null);
-      setMessages([]);
-      setSelectedMessage(null);
+      if (updatedList.length > 0) {
+        const nextEmail = updatedList[0];
+        setCurrentEmail(nextEmail);
+        setMessages([]);
+        setSelectedMessage(null);
+        await refreshMessages(nextEmail.id, false);
+      } else {
+        setCurrentEmail(null);
+        setMessages([]);
+        setSelectedMessage(null);
+      }
+      
+      await loadHistory();
     } catch (error) {
       toast.error('Không thể xóa email');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const addTime = async () => {
-    if (!currentEmail) return;
-    
-    setLoading(true);
-    try {
-      const response = await axios.post(`${API}/emails/${currentEmail.id}/extend-time`);
-      
-      // Update currentEmail with new expires_at
-      setCurrentEmail(prev => ({
-        ...prev,
-        expires_at: response.data.expires_at
-      }));
-      
-      toast.success('Đã làm mới thời gian về 10 phút');
-    } catch (error) {
-      toast.error('Không thể gia hạn thời gian', {
-        description: error.response?.data?.detail || 'Lỗi không xác định'
-      });
     } finally {
       setLoading(false);
     }
@@ -566,8 +463,14 @@ function App() {
     } catch (error) {
       console.error('Error refreshing messages:', error);
       if (error.response?.status === 404) {
-        setCurrentEmail(null);
-        setMessages([]);
+        const updatedList = emailList.filter(email => email.id !== emailId);
+        setEmailList(updatedList);
+        if (currentEmail?.id === emailId) {
+          const fallback = updatedList[0] || null;
+          setCurrentEmail(fallback);
+          setMessages([]);
+          setSelectedMessage(null);
+        }
       }
       if (showToast) {
         toast.error('Không thể làm mới tin nhắn');
@@ -896,9 +799,7 @@ function App() {
                       <div className="email-address-container">
                         <span className="email-address">{currentEmail.address}</span>
                         <div className="email-actions-inline">
-                          <span className={`timer ${timeLeft <= 60 ? 'timer-warning' : ''}`}>
-                            {formatTime(timeLeft)}
-                          </span>
+                          <span className="timer">Không hết hạn</span>
                           <Button
                             variant="ghost"
                             size="icon"
@@ -910,12 +811,7 @@ function App() {
                         </div>
                       </div>
                       {/* Service Badge */}
-                      {currentEmail.provider && (
-                        <div className="service-badge">
-                          <Server className="h-3 w-3" />
-                          {getServiceDisplayName(currentEmail.provider)}
-                        </div>
-                      )}
+                      
                     </div>
 
                     {/* Service Selection Form (Always Visible) */}
@@ -955,17 +851,38 @@ function App() {
                       </div>
                     </div>
 
+                    {/* Existing Emails Selector */}
+                    <div className="email-switcher">
+                      <div className="email-switcher-header">
+                        <label className="form-label">Email đã tạo</label>
+                        <span className="email-switcher-count">{emailList.length}</span>
+                      </div>
+                      <select
+                        className="email-switcher-select"
+                        value={currentEmail?.id || ''}
+                        onChange={handleSelectExistingEmail}
+                        disabled={emailList.length === 0}
+                      >
+                        {emailList.length === 0 ? (
+                          <option value="">Chưa có email nào</option>
+                        ) : (
+                          <>
+                            <option value="" disabled>Chọn email cần xem</option>
+                            {emailList.map(email => (
+                              <option key={email.id} value={email.id}>
+                                {email.address}
+                              </option>
+                            ))}
+                          </>
+                        )}
+                      </select>
+                      <p className="email-switcher-hint">
+                        Chọn lại email đã tạo trước đó để lấy mã xác thực bất kỳ lúc nào.
+                      </p>
+                    </div>
+
                     {/* Action Buttons */}
                     <div className="action-buttons-group">
-                      <Button
-                        onClick={addTime}
-                        className="action-btn"
-                        variant="outline"
-                        disabled={loading || currentEmail?.isHistory}
-                      >
-                        <Clock className="h-5 w-5 mr-2" />
-                        Làm mới 10 phút
-                      </Button>
                       <Button
                         onClick={createNewEmail}
                         className="action-btn"
@@ -979,7 +896,7 @@ function App() {
                         onClick={deleteCurrentEmail}
                         className="action-btn action-btn-danger"
                         variant="outline"
-                        disabled={loading || currentEmail?.isHistory}
+                        disabled={loading || !currentEmail}
                       >
                         <Trash2 className="h-5 w-5 mr-2" />
                         Xóa
@@ -988,7 +905,7 @@ function App() {
                         onClick={saveCurrentEmail}
                         className="action-btn action-btn-save"
                         variant="default"
-                        disabled={loading || currentEmail?.isHistory}
+                        disabled={loading || !currentEmail}
                       >
                         <Bookmark className="h-5 w-5 mr-2" />
                         Lưu
