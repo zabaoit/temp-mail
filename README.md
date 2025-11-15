@@ -1,54 +1,53 @@
-# TempMail - Temporary Email Generator
+# TempMail - Unlimited Temporary Email Generator
 
-A full-stack web application for generating temporary email addresses with multiple service providers support. Built with FastAPI (Python) backend, React frontend, and MySQL database.
+A full-stack web application for generating disposable email addresses that stay active until you delete them. The stack combines a FastAPI (Python) backend, a modern React frontend, and a MySQL database so you can manage unlimited inboxes, keep history, and save message content for later.
 
-## 🌟 Features
+## Features
 
-- ✉️ **Auto-create temporary emails** - Automatically creates a new email when you open the app
-- ⏰ **10-minute expiration** - Emails automatically expire after 10 minutes
-- 🔄 **Auto-refresh** - New email is created automatically when the current one expires
-- 📧 **Multiple providers**: Mail.tm, 1secmail, Mail.gw, Guerrilla Mail
-- 💾 **Save emails** - Save important emails for later viewing
-- 📜 **Email history** - View expired emails with full message history
-- 🎨 **Modern UI** - Beautiful dark theme with smooth animations
-- 🔐 **View HTML/Text content** - Full support for HTML and plain text emails
+- Auto-create the first inbox on launch and keep it forever until you remove it manually.
+- Manage multiple providers (Mail.tm, Mail.gw, 1secmail) with an auto mode plus manual domain selection.
+- Unlimited lifetime inboxes with history and saved tabs so nothing disappears automatically.
+- Auto-refresh every 30 seconds plus manual refresh, message previews, and full HTML/Text viewers.
+- Save important messages (full HTML/text content) or bookmark entire inboxes directly from the UI.
+- Copy-to-clipboard shortcuts, service/domain switchers, and a lightweight timeline showing when messages arrived.
+- Dark/light themes, responsive layout, and polished empty states for laptops or mobile browsers.
 
-## 🛠️ Tech Stack
+## Tech Stack
 
-**Backend:**
+**Backend**
 - FastAPI (Python 3.9+)
 - MySQL 8.0+ with SQLAlchemy ORM
-- httpx for async API calls
-- Background tasks for email expiration
+- httpx for async provider API calls
+- Background tasks for provider sync and optional housekeeping
 
-**Frontend:**
+**Frontend**
 - React 18
 - Tailwind CSS
 - Axios for API calls
 - Lucide React icons
 - Sonner for toast notifications
 
-## 📋 Prerequisites
+## Prerequisites
 
 Before you begin, ensure you have the following installed:
 
 1. **Python 3.9 or higher**
-   - Download from: https://www.python.org/downloads/
+   - Download: https://www.python.org/downloads/
    - Verify: `python --version` or `python3 --version`
 
 2. **Node.js 18 or higher & Yarn**
-   - Download Node.js from: https://nodejs.org/
+   - Download Node.js: https://nodejs.org/
    - Install Yarn: `npm install -g yarn`
    - Verify: `node --version` && `yarn --version`
 
 3. **MySQL 8.0 or higher**
-   - Download from: https://dev.mysql.com/downloads/mysql/
-   - Or use package manager:
+   - Download: https://dev.mysql.com/downloads/mysql/
+   - Or install via package manager:
      - macOS: `brew install mysql`
      - Ubuntu/Debian: `sudo apt install mysql-server`
-     - Windows: Download installer from MySQL website
+     - Windows: download the MySQL installer
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Step 1: Configure MySQL
 
@@ -72,7 +71,7 @@ mysql -u root -p
 ```sql
 CREATE DATABASE temp_mail CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- If using different credentials, update backend/.env file
+-- If using different credentials, update backend/.env
 -- Default credentials: root / 190705
 ```
 
@@ -99,7 +98,7 @@ venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-4. Verify environment variables in `.env`:
+4. Configure `.env`:
 ```env
 DB_HOST=localhost
 DB_PORT=3306
@@ -119,8 +118,8 @@ python init_db.py
 python -m uvicorn server:app --host 0.0.0.0 --port 8001 --reload
 ```
 
-Backend will be running at: **http://localhost:8001**  
-API documentation: **http://localhost:8001/docs**
+Backend runs at **http://localhost:8001**  
+API docs: **http://localhost:8001/docs**
 
 ### Step 3: Frontend Setup
 
@@ -134,67 +133,71 @@ cd frontend
 yarn install
 ```
 
-3. Verify environment variables in `.env`:
+3. Configure `.env`:
 ```env
 REACT_APP_BACKEND_URL=http://localhost:8001
 PORT=3000
 ```
 
-4. Start frontend development server:
+4. Start the development server:
 ```bash
 yarn start
 ```
 
-Frontend will be running at: **http://localhost:3000**
+Frontend runs at **http://localhost:3000**
 
 ### Step 4: Use the Application
 
-1. Open your browser and go to: **http://localhost:3000**
-2. A temporary email will be created automatically
-3. Copy the email address and use it for testing/registration
-4. Refresh to check for new messages
-5. Click on messages to view HTML/text content
+1. Browse to **http://localhost:3000**
+2. The first unlimited inbox is created automatically
+3. Use the provider/domain selectors to create more addresses or switch services
+4. Copy addresses, refresh messages, and toggle auto-refresh as needed
+5. Save important messages or delete inboxes - history and saved tabs keep everything accessible
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 /app/
-├── backend/
-│   ├── server.py              # Main FastAPI application
-│   ├── database.py            # MySQL connection & session
-│   ├── models.py              # SQLAlchemy models (TempEmail, EmailHistory, SavedEmail)
-│   ├── background_tasks.py   # Auto-expiration background task
-│   ├── init_db.py            # Database initialization script
-│   ├── requirements.txt      # Python dependencies
-│   └── .env                  # Backend configuration
-├── frontend/
-│   ├── src/
-│   │   ├── App.js           # Main React component
-│   │   ├── App.css          # Styles
-│   │   └── index.js         # Entry point
-│   ├── public/              # Static assets
-│   ├── package.json         # Node dependencies
-│   └── .env                 # Frontend configuration
-├── README.md                # This file (English)
-└── HUONG_DAN.md            # Vietnamese documentation
+|-- backend/
+|   |-- server.py            # FastAPI application and API endpoints
+|   |-- database.py          # MySQL connection/session helpers
+|   |-- models.py            # SQLAlchemy models (TempEmail, EmailHistory, SavedEmail)
++   |-- background_tasks.py  # Optional housekeeping/background jobs
+|   |-- init_db.py           # Database bootstrap script
+|   |-- requirements.txt     # Backend dependencies
+|   |-- .env                 # Backend configuration
+|
+|-- frontend/
+|   |-- src/
+|   |   |-- App.js           # Main React application (unlimited inbox UI)
+|   |   |-- TempMail.js      # Secondary/alternate UI (optional)
+|   |   |-- App.css          # Global styles
+|   |   |-- index.js         # Entry point
+|   |-- public/              # Static assets
+|   |-- package.json         # Frontend dependencies
+|   |-- .env                 # Frontend configuration
+|
+|-- README.md                # English documentation
+|-- HUONG_DAN.md             # Vietnamese documentation
 ```
 
-## 🗄️ Database Schema
+## Database Schema
 
 ### Table: `temp_emails`
 ```sql
 CREATE TABLE temp_emails (
     id INT AUTO_INCREMENT PRIMARY KEY,
     address VARCHAR(255) UNIQUE NOT NULL,
-    password VARCHAR(255),
-    token TEXT,
-    account_id VARCHAR(255),
+    password VARCHAR(255) NOT NULL,
+    token TEXT NOT NULL,
+    account_id VARCHAR(255) NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    expires_at DATETIME NOT NULL,
+    expires_at DATETIME NULL,          -- kept for backwards compatibility
     message_count INT DEFAULT 0,
-    provider VARCHAR(50),
-    username VARCHAR(100),
-    domain VARCHAR(100)
+    provider VARCHAR(50) NOT NULL,
+    mailbox_id VARCHAR(255),
+    username VARCHAR(255),
+    domain VARCHAR(255)
 );
 ```
 
@@ -203,15 +206,12 @@ CREATE TABLE temp_emails (
 CREATE TABLE email_history (
     id INT AUTO_INCREMENT PRIMARY KEY,
     address VARCHAR(255) NOT NULL,
-    password VARCHAR(255),
-    token TEXT,
-    account_id VARCHAR(255),
-    created_at DATETIME,
-    expired_at DATETIME NOT NULL,
-    message_count INT DEFAULT 0,
-    provider VARCHAR(50),
-    username VARCHAR(100),
-    domain VARCHAR(100)
+    password VARCHAR(255) NOT NULL,
+    token TEXT NOT NULL,
+    account_id VARCHAR(255) NOT NULL,
+    created_at DATETIME NOT NULL,
+    expired_at DATETIME NOT NULL,      -- timestamp when the inbox was archived
+    message_count INT DEFAULT 0
 );
 ```
 
@@ -219,44 +219,48 @@ CREATE TABLE email_history (
 ```sql
 CREATE TABLE saved_emails (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    email_id INT NOT NULL,
+    email_address VARCHAR(255) NOT NULL,
     message_id VARCHAR(255) NOT NULL,
+    subject VARCHAR(500),
     from_address VARCHAR(255),
     from_name VARCHAR(255),
-    subject TEXT,
-    html_content LONGTEXT,
-    text_content LONGTEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    saved_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    html LONGTEXT,
+    text LONGTEXT,
+    created_at DATETIME NOT NULL,
+    saved_at DATETIME NOT NULL
 );
 ```
 
-## 🔌 API Endpoints
+## API Endpoints
+
+Base URL: `http://localhost:8001/api`
 
 ### Active Emails
-- `POST /api/emails/create` - Create new temporary email
-- `GET /api/emails` - List active emails
-- `GET /api/emails/{id}` - Get email details
-- `GET /api/emails/{id}/messages` - Get messages for email
-- `POST /api/emails/{id}/refresh` - Refresh messages
-- `DELETE /api/emails/{id}` - Delete email
-- `POST /api/emails/{id}/extend-time` - Extend email lifetime by 10 minutes
+- `POST /emails/create` - Create a new inbox (auto provider or manual selection)
+- `GET /emails` - List active inboxes
+- `GET /emails/{id}` - Get inbox details
+- `POST /emails/{id}/refresh` - Refresh messages for an inbox
+- `GET /emails/{id}/messages` - List messages inside an inbox
+- `GET /emails/{id}/messages/{message_id}` - Get message detail (HTML/Text)
+- `POST /emails/{id}/messages/{message_id}/save` - Save a message to the Saved tab
+- `POST /emails/{id}/save` - Bookmark the inbox (metadata only)
+- `DELETE /emails/{id}` - Delete an inbox (moves it to history)
 
 ### History
-- `GET /api/emails/history/list` - List expired emails
-- `GET /api/emails/history/{id}/messages` - Get messages from history
-- `DELETE /api/emails/history/delete` - Delete history emails (selective or all)
+- `GET /emails/history/list` - List archived inboxes
+- `GET /emails/history/{id}/messages` - List messages of a history entry
+- `GET /emails/history/{id}/messages/{message_id}` - Message detail from history
+- `DELETE /emails/history/delete` - Delete selected or all history entries
 
 ### Saved Emails
-- `POST /api/emails/{id}/messages/{msg_id}/save` - Save a message
-- `GET /api/emails/saved/list` - List saved emails
-- `GET /api/emails/saved/{id}` - Get saved email details
-- `DELETE /api/emails/saved/delete` - Delete saved emails
+- `GET /emails/saved/list` - List saved messages
+- `GET /emails/saved/{id}` - Full saved message content
+- `DELETE /emails/saved/delete` - Delete selected or all saved messages
 
 ### Domains
-- `GET /api/domains?service={service}` - Get available domains for service
+- `GET /domains?service={service}` - Return available domains for the requested provider
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Backend won't start
 
@@ -297,14 +301,14 @@ PORT=7050
 
 ### Database issues
 
-**Reset database:**
+**Reset database**
 ```bash
 cd backend
 python init_db.py --reset
 # Type 'yes' to confirm
 ```
 
-**Manual database reset:**
+**Manual reset**
 ```sql
 mysql -u root -p
 
@@ -313,64 +317,63 @@ CREATE DATABASE temp_mail CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE temp_mail;
 ```
 
-## 🔧 Development Tips
+## Development Tips
 
 ### Hot Reload
-- Backend: Automatically reloads when you edit Python files (uvicorn --reload)
-- Frontend: Automatically reloads when you edit React files
+- Backend: `uvicorn --reload` watches Python files
+- Frontend: `yarn start` reloads on file changes
 
 ### Viewing Logs
 ```bash
-# Backend logs (if running in foreground)
-# Logs appear in terminal
-
-# Check background task logs
-# Logs appear in backend terminal with timestamp
+# Backend logs appear in the terminal running uvicorn
+# Frontend build errors appear in the terminal running yarn start
 ```
 
 ### Testing API
-- Use the built-in Swagger UI: http://localhost:8001/docs
-- Or use curl:
+- Use Swagger UI: http://localhost:8001/docs
+- Or curl:
 ```bash
-# Create email
+# Create inbox
 curl -X POST http://localhost:8001/api/emails/create
 
-# Get emails
+# List inboxes
 curl http://localhost:8001/api/emails
+
+# List saved messages
+curl http://localhost:8001/api/emails/saved/list
 ```
 
-## 🎯 Features Explained
+## Features Explained
 
 ### Auto-create on First Visit
-When you open the app for the first time, it automatically creates a temporary email without requiring you to click any button.
+The application spins up the first inbox automatically so you can copy an address immediately without pressing any buttons.
 
-### 10-Minute Timer
-Each email has a 10-minute lifespan. The timer is displayed at the top and counts down in real-time.
+### Unlimited Lifetime
+Inboxes stay active indefinitely until you delete them. The timer badge shows "Unlimited" to reflect that behavior.
 
-### Extend Time Button
-Click "Làm mới 10 phút" to reset the timer back to 10 minutes (not cumulative - always resets to 10 minutes).
+### Manage Multiple Addresses
+Use the provider/domain selectors and the inbox switcher to rotate between as many addresses as you need. Delete or bookmark any inbox without affecting the others.
 
-### Auto-create on Expiry
-When the timer reaches 0, the old email is automatically moved to history and a new email is created.
+### Smart Refresh
+Auto-refresh runs every 30 seconds, and you can trigger manual refreshes whenever you expect a verification email. Message previews load quickly and you can open HTML or plain-text tabs for full content.
 
 ### Email History
-View all expired emails in the "Lịch sử" tab. You can still view messages from expired emails. Use checkboxes to select and delete history.
+Deleting an inbox moves it to history. You can revisit those inboxes, view all messages that were received, and clean up history in bulk at any time.
 
 ### Save Important Emails
-Click the "Lưu" button when viewing a message to save it permanently. Saved emails appear in the "Mail đã lưu" tab.
+Save any message into the Saved tab to keep the full HTML/Text payload indefinitely. Use this for verification steps, receipts, or debugging incoming emails.
 
-## 📞 Support
+## Support
 
-For issues or questions:
-1. Check this README and HUONG_DAN.md (Vietnamese version)
+1. Review this README and `HUONG_DAN.md`
 2. Verify all prerequisites are installed
 3. Check the troubleshooting section
-4. Review backend logs for error messages
+4. Inspect backend logs for specific error messages
 
-## 📄 License
+## License
 
 This project is provided as-is for personal and educational use.
 
 ---
 
-**Made with ❤️ using FastAPI + React + MySQL**
+Made with love using FastAPI + React + MySQL
